@@ -1,0 +1,23 @@
+{
+  "name": "narours",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faysal146/natours.git"
+  },
+  "keywords": [],
+  "author": "Faysal Ahmed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/faysal146/natours/issues"
+  },
+  "homepage": "https://github.com/faysal146/natours#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
