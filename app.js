@@ -1,13 +1,15 @@
-const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
+const tourRouter = require('./Routes/TourRoute');
+const userRouter = require('./Routes/UserRoute');
+
 const app = express();
-const RouteHandler = require('./routeHandler');
-const { getAllPost, createPost, getTour, upDateTour, deleteTour } = new RouteHandler();
-// use middleWere
+
+app.use(morgan('dev'));
 app.use(express.json());
 
-//all the route
-app.route('/api/v1/tours').get(getAllPost).post(createPost);
-app.route('/api/v1/tours/:id').get(getTour).patch(upDateTour).delete(deleteTour);
 
-app.listen(3000);
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+
+module.exports = app;
