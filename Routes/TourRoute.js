@@ -3,10 +3,12 @@ const tourRouterControls = require('../Controls/TourRouteControls');
 
 const tourRouter = express.Router();
 
+tourRouter.param('id', tourRouterControls.checkId);
+
 tourRouter
-     .route('/')
-     .get(tourRouterControls.getAllPost)
-     .post(tourRouterControls.createPost);
+	.route('/')
+	.get(tourRouterControls.getAllPost)
+	.post(tourRouterControls.checkBody,tourRouterControls.createPost);
 
 tourRouter
 	.route('/:id')
@@ -14,4 +16,4 @@ tourRouter
 	.patch(tourRouterControls.upDateTour)
 	.delete(tourRouterControls.deleteTour);
 
-module.exports = tourRouter; 
+module.exports = tourRouter;
