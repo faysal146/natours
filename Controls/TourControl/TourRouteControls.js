@@ -2,7 +2,23 @@ const Tour = require('../../Models/TourModel/TourModel');
 // All the CRUD
 exports.getAllPost = async (req, res) => {
     try {
-        const tours = await Tour.find();
+        console.log(req.query);
+        // 1) filtering query base
+        const queryObj = { ...req.query };
+        const exclude = ['limit', 'sort', 'page', 'fields'];
+        exclude.forEach(q => delete queryObj[q]);
+        //2) filtering range
+        // gte, gt , lte, lt => $gte, $gt, $lte, $lt
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(
+            /\b(gte|gt|lte|lt)\b/g,
+            match => `$${match}`
+        );
+        queryStr = JSON.parse(queryStr);
+        const query = Tour.find(queryStr);
+
+        const tours = await query;
+        // send the response
         res.status(200).send({
             status: 'success',
             result: tours.length,
@@ -18,10 +34,10 @@ exports.getAllPost = async (req, res) => {
     }
 };
 exports.createPost = async (req, res) => {
-    //     let newTour = await new Tour(req.body);
-    //     newTour = await newTour.save();
-    const newTour = await Tour.create(req.body);
     try {
+        //     let newTour = await new Tour(req.body);
+        //     newTour = await newTour.save();
+        const newTour = await Tour.create(req.body);
         res.status(201).json({
             status: 'success',
             data: {
@@ -29,7 +45,6 @@ exports.createPost = async (req, res) => {
             }
         });
     } catch (err) {
-        console.log(err);
         res.status(404).json({
             status: 'fail',
             message: err
