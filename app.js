@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
-const tourRouter = require('./Routes/TourRoute');
-const userRouter = require('./Routes/UserRoute');
+const tourRouter = require('./Routes/TourRoute/TourRoute');
+const userRouter = require('./Routes/UserRoute/UserRoute');
 
 const app = express();
 if (process.env.NODE_ENV === 'development') {
