@@ -32,6 +32,19 @@ exports.getAllPost = async (req, res) => {
             query = query.select('-__v');
         }
 
+        //pagination
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 3;
+        const skip = (page - 1) * limit;
+        query = query.skip(skip).limit(limit);
+        if (req.query.page) {
+            const numDoc = await Tour.countDocuments();
+            if (skip >= numDoc) {
+                console.log('from error');
+                throw new Error('page not found');
+            }
+        }
+
         const tours = await query;
         // send the response
         res.status(200).send({
