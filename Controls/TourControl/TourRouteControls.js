@@ -1,5 +1,19 @@
 const Tour = require('../../Models/TourModel/TourModel');
 // All the CRUD
+exports.aliasTopTours = async (req, res, next) => {
+    /*
+        limit = 5, 
+        sort = ratingsAverage,price, 
+        page = 1, 
+        field = 'name price ratingsAverage summary' 
+    */
+    req.query.limit = 5;
+    req.query.sort = '-ratingsAverage,price,';
+    req.query.page = 1;
+    req.query.field = 'name,price,ratingsAverage,summary';
+    next();
+};
+
 exports.getAllPost = async (req, res) => {
     try {
         // 1A) filtering query base
@@ -40,7 +54,6 @@ exports.getAllPost = async (req, res) => {
         if (req.query.page) {
             const numDoc = await Tour.countDocuments();
             if (skip >= numDoc) {
-                console.log('from error');
                 throw new Error('page not found');
             }
         }
