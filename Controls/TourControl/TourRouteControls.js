@@ -2,10 +2,9 @@ const Tour = require('../../Models/TourModel/TourModel');
 // All the CRUD
 exports.getAllPost = async (req, res) => {
     try {
-        console.log(req.query);
         // 1A) filtering query base
         const queryObj = { ...req.query };
-        const exclude = ['limit', 'sort', 'page', 'fields'];
+        const exclude = ['limit', 'sort', 'page', 'field'];
         exclude.forEach(q => delete queryObj[q]);
         //2B) filtering range
         // gte, gt , lte, lt => $gte, $gt, $lte, $lt
@@ -16,11 +15,21 @@ exports.getAllPost = async (req, res) => {
         );
         queryStr = JSON.parse(queryStr);
         let query = Tour.find(queryStr);
+
+        // add sorting
+
         if (req.query.sort) {
             const querySort = req.query.sort.split(',').join(' ');
             query = query.sort(querySort);
         } else {
             query = query.sort('createAt');
+        }
+        // field query
+        if (req.query.field) {
+            const fieldQuery = req.query.field.split(',').join(' ');
+            query = query.select(fieldQuery);
+        } else {
+            query = query.select('-__v');
         }
 
         const tours = await query;
