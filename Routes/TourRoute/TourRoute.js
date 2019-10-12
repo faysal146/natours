@@ -5,6 +5,15 @@ const tourRouter = express.Router();
 
 //tourRouter.param('id', tourRouterControls.checkId);
 
+tourRouter.route('/tours-status').get(tourRouterControls.toursStatus);
+tourRouter
+    .route('/get-mountly-tours/:year')
+    .get(tourRouterControls.getMountlyTour);
+
+tourRouter //apply middlewere => aliasTopTours
+    .route('/top-5-tours')
+    .get(tourRouterControls.aliasTopTours, tourRouterControls.getAllPost);
+
 tourRouter
     .route('/')
     .get(tourRouterControls.getAllPost)
