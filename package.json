@@ -1,42 +1,46 @@
 {
-  "name": "narours",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "nodemon ./Server/Server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/faysal146/natours.git"
-  },
-  "keywords": [],
-  "author": "Faysal Ahmed",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/faysal146/natours/issues"
-  },
-  "homepage": "https://github.com/faysal146/natours#readme",
-  "dependencies": {
-    "dotenv": "^8.1.0",
-    "express": "^4.17.1",
-    "mongoose": "^5.7.3",
-    "morgan": "^1.9.1",
-    "slugify": "^1.3.5",
-    "validator": "^11.1.0"
-  },
-  "devDependencies": {
-    "eslint": "^6.5.1",
-    "eslint-config-airbnb": "^18.0.1",
-    "eslint-config-prettier": "^6.4.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-node": "^10.0.0",
-    "eslint-plugin-prettier": "^3.1.1",
-    "eslint-plugin-react": "^7.16.0",
-    "prettier": "^1.18.2"
-  },
-  "engines": {
-    "node": ">=10.0.0"
-  }
+	"name": "narours",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "nodemon ./Server/Server.js",
+		"start:prod": "NODE_ENV=production nodemon ./Server./Server.js",
+		"debug": "ndb ./Server/Server.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/faysal146/natours.git"
+	},
+	"keywords": [],
+	"author": "Faysal Ahmed",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/faysal146/natours/issues"
+	},
+	"homepage": "https://github.com/faysal146/natours#readme",
+	"dependencies": {
+		"dotenv": "^8.1.0",
+		"express": "^4.17.1",
+		"mongoose": "^5.7.3",
+		"morgan": "^1.9.1",
+		"slugify": "^1.3.5",
+		"validator": "^11.1.0"
+	},
+	"devDependencies": {
+		"eslint": "^6.5.1",
+		"eslint-config-airbnb": "^18.0.1",
+		"eslint-config-prettier": "^6.4.0",
+		"eslint-plugin-import": "^2.18.2",
+		"eslint-plugin-jsx-a11y": "^6.2.3",
+		"eslint-plugin-node": "^10.0.0",
+		"eslint-plugin-prettier": "^3.1.1",
+		"eslint-plugin-react": "^7.16.0",
+		"ndb": "^1.1.5",
+		"nodemon": "^1.19.3",
+		"prettier": "^1.18.2"
+	},
+	"engines": {
+		"node": ">=10.0.0"
+	}
 }

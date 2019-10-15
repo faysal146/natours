@@ -1,8 +1,9 @@
 const express = require('express');
 const tourRouterControls = require('../../Controls/TourControl/TourRouteControls');
-
+// Router middlewere
 const tourRouter = express.Router();
 
+// param middle were to check id
 //tourRouter.param('id', tourRouterControls.checkId);
 
 tourRouter.route('/tours-status').get(tourRouterControls.toursStatus);
