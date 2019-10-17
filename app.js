@@ -5,7 +5,7 @@ const userRouter = require('./Routes/UserRoute/UserRoute');
 const ErrorHandler = require('./Utils/ErrorHandler');
 const globalErrorHandler = require('./Controls/ErrorControl/ErrorControl');
 
-console.log(process.env.NODE_ENV);
+//console.log(process.env.NODE_ENV);
 
 const app = express();
 if (process.env.NODE_ENV === 'development') {
@@ -42,8 +42,8 @@ app.all('*', (req, res, next) => {
 
     //next(err);
 });
-
 // global error handle
+
 app.use(globalErrorHandler);
 
 module.exports = app;

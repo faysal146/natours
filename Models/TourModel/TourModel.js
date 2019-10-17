@@ -88,7 +88,7 @@ tourSchema.virtual('durationWeeks').get(function() {
     return this.duration / 7;
 });
 //mongoose middle were
-// run before .save() and .create()
+// run before .save() and .create() only not find other method
 tourSchema.pre('save', function(next) {
     this.slug = slugify(this.name, { lower: true });
     next();
