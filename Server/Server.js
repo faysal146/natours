@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 // handle synce error
 process.on('uncaughtException', err => {
-    console.log(err.name, err.message);
+    // console.log(err.message, err.name);
+    console.log(err);
     process.exit(1);
 });
 
@@ -30,7 +31,8 @@ const server = app.listen(PORT, () => {
 
 // if any unhandle promise
 process.on('unhandledRejection', err => {
-    console.log(err.message, err.name);
+    // console.log(err.message, err.name);
+    console.log(err);
     console.log('Unhandled Rejection Shutting Down...');
     server.close(() => process.exit(1));
 });

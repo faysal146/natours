@@ -44,6 +44,14 @@ function handleValidationDB(err) {
     );
     return new ErrorHandler(error, 400);
 }
+// handle JWT token error
+function handleJWTError() {
+    return new ErrorHandler('Invalid Token! Please Login Again', 401);
+}
+function TokenExpiredError() {
+    return new ErrorHandler('Your Token Has Expired! Please Login Again', 401);
+}
+
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500; // 500 mean internal server error
     err.status = err.status || 'error'; // 500 status 'error'
@@ -55,6 +63,9 @@ module.exports = (err, req, res, next) => {
         if (error.name === 'CastError') error = handleCaseErrorDB(error);
         if (error.code === 11000) error = handleDuplicateFieldsDB(error);
         if (error.name === 'ValidationError') error = handleValidationDB(error);
+        if (error.name === 'JsonWebTokenError') error = handleJWTError();
+        if (error.name === 'TokenExpiredError') error = TokenExpiredError();
+
         sendErrorProd(error, res);
     }
 };

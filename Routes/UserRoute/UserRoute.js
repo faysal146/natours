@@ -1,11 +1,11 @@
 const express = require('express');
 const userRouterControls = require('../../Controls/UserControl/UserRouteControls');
-const auth = require('../../Controls/AuthControl/AuthControl');
+const authControl = require('../../Controls/AuthControl/AuthControl');
 
 const userRouter = express.Router();
 
-userRouter.post('/singup', auth.singUp);
-userRouter.post('/login', auth.login);
+userRouter.post('/singup', authControl.singUp);
+userRouter.post('/login', authControl.login);
 
 userRouter
     .route('/')

@@ -1,5 +1,6 @@
 const express = require('express');
 const tourRouterControls = require('../../Controls/TourControl/TourRouteControls');
+const authControl = require('../../Controls/AuthControl/AuthControl');
 // Router middlewere
 const tourRouter = express.Router();
 
@@ -13,11 +14,11 @@ tourRouter
 
 tourRouter //apply middlewere => aliasTopTours
     .route('/top-5-tours')
-    .get(tourRouterControls.aliasTopTours, tourRouterControls.getAllPost);
+    .get(tourRouterControls.aliasTopTours, tourRouterControls.getAllTours);
 
 tourRouter
     .route('/')
-    .get(tourRouterControls.getAllPost)
+    .get(authControl.protectRoute, tourRouterControls.getAllTours)
     .post(tourRouterControls.createPost);
 
 tourRouter

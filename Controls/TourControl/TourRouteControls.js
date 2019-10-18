@@ -17,7 +17,7 @@ exports.aliasTopTours = (req, res, next) => {
     req.query.field = 'name,price,ratingsAverage,summary';
     next();
 };
-exports.getAllPost = withErrorHOF(async (req, res, next) => {
+exports.getAllTours = withErrorHOF(async (req, res, next) => {
     const apiFutures = new APIFutures(Tour.find(), req.query)
         .filtering()
         .sorting()
