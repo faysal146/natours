@@ -1,15 +1,16 @@
+const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const User = require('../../Models/UserModel/UserModel');
 const withErrorHOF = require('../../Utils/ErrorHOF');
 const ErrorHandler = require('../../Utils/ErrorHandler');
+const sendMail = require('../../Utils/SendMailer');
 
 const authToken = id =>
     jwt.sign({ id }, process.env.SECRET_KEY, {
         expiresIn: process.env.TOKEN_EXPIRED
     });
-
 exports.singUp = withErrorHOF(async (req, res, next) => {
     const newUser = await User.create(req.body);
     const token = authToken(newUser._id);
@@ -23,7 +24,6 @@ exports.singUp = withErrorHOF(async (req, res, next) => {
         }
     });
 });
-
 exports.login = withErrorHOF(async (req, res, next) => {
     const { email, password } = req.body;
     // check email and password valid or not
@@ -49,7 +49,6 @@ exports.login = withErrorHOF(async (req, res, next) => {
         token
     });
 });
-
 exports.protectRoute = withErrorHOF(async (req, res, next) => {
     let token;
     // 1) getting token and check it is valid or not
@@ -94,4 +93,104 @@ exports.protectRoute = withErrorHOF(async (req, res, next) => {
     req.user = currentUser;
     // call the next middlewere
     next();
+});
+exports.restrictTo = (...roles) => {
+    return withErrorHOF(async (req, res, next) => {
+        // role is array of list the contains is type of user role
+        if (!roles.includes(req.user.role)) {
+            return next(
+                new ErrorHandler(
+                    `Sorry You Do Not have Permision To Perfome This Action`,
+                    403 // forbiten
+                )
+            );
+        }
+        // other wise call next
+        next();
+    });
+};
+
+exports.forgotPassword = withErrorHOF(async (req, res, next) => {
+    // 1) get user based on posted email
+    const { email } = req.body;
+    if (!validator.isEmail(email)) {
+        return next(new ErrorHandler('Please Provide Valid Email', 400)); // bad reqeust
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return next(new ErrorHandler('No Account Found With this Email', 404)); // not found
+    }
+    // 2) generate random token
+    const resetToken = await user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    // 3) send email to the user with random token
+    const resetUrl = `${req.protocol}://${req.get(
+        'host'
+    )}/api/v1/users/reset-password/${resetToken}`;
+    const message = `Forget Your Password ?. Please Click The Link to Set New Password ${resetUrl}`;
+
+    try {
+        sendMail({
+            to: user.email,
+            subject: 'Your Account Reset Password Token (Valid for 10 min)',
+            message
+        });
+        res.status(200).json({
+            status: 'success',
+            message: 'reset password token send to the email'
+        });
+    } catch (err) {
+        user.resetPasswordToken = undefined;
+        user.passwordResetExpired = undefined;
+        user.save({ validateBeforeSave: false });
+        return next(
+            new ErrorHandler(
+                'There was an error to sending email, please try again later',
+                500
+            )
+        );
+    }
+});
+exports.resetPassword = withErrorHOF(async (req, res, next) => {
+    // 1) get the token from params
+    const { resetToken } = req.params;
+    // 2 ) check there is a token
+    if (!resetToken) {
+        return next(new ErrorHandler('invalid token', 400));
+    }
+    // 3) hased the token
+    const hasedToken = crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest('hex');
+    // 4 ) check token is valid or has not expried
+    const user = await User.findOne({
+        passwordResetToken: hasedToken,
+        passwordResetExpired: { $gt: Date.now() }
+    });
+    // 5) if no user find mean => token is not valid or time has expired
+    if (!user) {
+        // stop the code and send the error message
+        return next(new ErrorHandler('Token is invalid or has expired', 400));
+    }
+
+    // 4 ) reset the new password
+    const { password, confirmPassword } = req.body;
+    user.password = password;
+    user.confirmPassword = confirmPassword;
+    user.passwordResetExpired = undefined;
+    user.passwordResetToken = undefined;
+    await user.save();
+    /*
+         5) update the password change at propety
+         this future is apply as pre middle were in ===> userModel.js
+    */
+    // 6) send the new token to the user
+    const token = await authToken(user._id);
+    res.status(200).json({
+        status: 'success',
+        token
+    });
 });
