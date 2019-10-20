@@ -11,18 +11,19 @@ const authToken = id =>
     jwt.sign({ id }, process.env.SECRET_KEY, {
         expiresIn: process.env.TOKEN_EXPIRED
     });
+const sendResponse = ({ res, statusCode, token, user }) => {
+    res.status(statusCode || 200).json({
+        status: 'success',
+        token,
+        data: { user }
+    });
+};
 exports.singUp = withErrorHOF(async (req, res, next) => {
     const newUser = await User.create(req.body);
     const token = authToken(newUser._id);
     // const user = {...newUser}
     // delete user.password
-    res.status(201).json({
-        status: 'success',
-        token,
-        data: {
-            user: newUser
-        }
-    });
+    sendResponse({ res, statusCode: 201, token, user: newUser });
 });
 exports.login = withErrorHOF(async (req, res, next) => {
     const { email, password } = req.body;
@@ -44,10 +45,7 @@ exports.login = withErrorHOF(async (req, res, next) => {
     }
     // if everything ok send response to the client
     const token = authToken(user._id);
-    res.status(200).json({
-        status: 'success',
-        token
-    });
+    sendResponse({ res, token });
 });
 exports.protectRoute = withErrorHOF(async (req, res, next) => {
     let token;
@@ -189,8 +187,29 @@ exports.resetPassword = withErrorHOF(async (req, res, next) => {
     */
     // 6) send the new token to the user
     const token = await authToken(user._id);
-    res.status(200).json({
-        status: 'success',
-        token
-    });
+    sendResponse({ res, token });
+});
+
+exports.upDatePassword = withErrorHOF(async (req, res, next) => {
+    /*
+        const { id } = jwt.decode(req.headers.authorization.split(' ')[1]);
+        1) get user from the collection by the posted id
+        const user = await User.findOne({ _id: id }).select('+password');
+    */
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) {
+        return next(new ErrorHandler('Invlid Token please Log in Again', 401));
+    }
+    // 2) check the new posted password match the old password
+    const { currentPassword, password, confirmPassword } = req.body;
+    if (!(await user.correctPassword(currentPassword, user.password))) {
+        return next(new ErrorHandler(`Your Entered Password is Wrong`, 401));
+    }
+    // 3) upDate the password
+    user.password = password;
+    user.confirmPassword = confirmPassword;
+    await user.save();
+    // 4) Log user in send JWT token for user loged in
+    const token = authToken(user._id);
+    sendResponse({ res, token });
 });
