@@ -19,10 +19,11 @@ const sendResponse = ({ res, statusCode, token, user }) => {
     });
 };
 exports.singUp = withErrorHOF(async (req, res, next) => {
-    const newUser = await User.create(req.body);
-    const token = authToken(newUser._id);
-    // const user = {...newUser}
-    // delete user.password
+    const newUser = { ...req.body };
+    newUser.changePasswordAt = new Date().toISOString();
+    const addNewUser = await User.create(newUser);
+    const token = authToken(addNewUser._id);
+
     sendResponse({ res, statusCode: 201, token, user: newUser });
 });
 exports.login = withErrorHOF(async (req, res, next) => {
@@ -107,7 +108,6 @@ exports.restrictTo = (...roles) => {
         next();
     });
 };
-
 exports.forgotPassword = withErrorHOF(async (req, res, next) => {
     // 1) get user based on posted email
     const { email } = req.body;
@@ -189,7 +189,6 @@ exports.resetPassword = withErrorHOF(async (req, res, next) => {
     const token = await authToken(user._id);
     sendResponse({ res, token });
 });
-
 exports.upDatePassword = withErrorHOF(async (req, res, next) => {
     /*
         const { id } = jwt.decode(req.headers.authorization.split(' ')[1]);

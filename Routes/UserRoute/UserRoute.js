@@ -14,6 +14,11 @@ userRouter.patch(
     authControl.protectRoute,
     authControl.upDatePassword
 );
+userRouter.patch(
+    '/update-current-user',
+    authControl.protectRoute,
+    userRouterControls.upDateCurrent
+);
 
 userRouter
     .route('/')
