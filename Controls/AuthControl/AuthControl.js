@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
+const moment = require('moment');
 const User = require('../../Models/UserModel/UserModel');
 const withErrorHOF = require('../../Utils/ErrorHOF');
 const ErrorHandler = require('../../Utils/ErrorHandler');
@@ -11,7 +12,20 @@ const authToken = id =>
     jwt.sign({ id }, process.env.SECRET_KEY, {
         expiresIn: process.env.TOKEN_EXPIRED
     });
+
 const sendResponse = ({ res, statusCode, token, user }) => {
+    const options = {
+        expires: new Date(
+            Date.now() + moment.duration(90, 'days').asMilliseconds()
+        ),
+        httpOnly: true
+    };
+    if (process.env.NODE_ENV === 'production') options.secure = true;
+    
+    user.password = undefined;
+    user.active = undefined;
+
+    res.cookie('token', token, options);
     res.status(statusCode || 200).json({
         status: 'success',
         token,
@@ -20,11 +34,10 @@ const sendResponse = ({ res, statusCode, token, user }) => {
 };
 exports.singUp = withErrorHOF(async (req, res, next) => {
     const newUser = { ...req.body };
-    newUser.changePasswordAt = new Date().toISOString();
+    newUser.changePasswordAt = moment().toISOString();
     const addNewUser = await User.create(newUser);
     const token = authToken(addNewUser._id);
-
-    sendResponse({ res, statusCode: 201, token, user: newUser });
+    sendResponse({ res, statusCode: 201, token, user: addNewUser });
 });
 exports.login = withErrorHOF(async (req, res, next) => {
     const { email, password } = req.body;

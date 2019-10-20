@@ -15,9 +15,14 @@ userRouter.patch(
     authControl.upDatePassword
 );
 userRouter.patch(
-    '/update-current-user',
+    '/update-account',
     authControl.protectRoute,
-    userRouterControls.upDateCurrent
+    userRouterControls.updateCurrentUserData
+);
+userRouter.delete(
+    '/delete-account',
+    authControl.protectRoute,
+    userRouterControls.deleteCurrentUser
 );
 
 userRouter

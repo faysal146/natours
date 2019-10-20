@@ -24,7 +24,7 @@ exports.getAllTheUsers = withErrorHOF(async (req, res) => {
         }
     });
 });
-exports.upDateCurrent = withErrorHOF(async (req, res, next) => {
+exports.updateCurrentUserData = withErrorHOF(async (req, res, next) => {
     // 1) check if password is change with this route
     if (req.body.password || req.body.confirmPassword) {
         return next(
@@ -49,6 +49,13 @@ exports.upDateCurrent = withErrorHOF(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         data: { user: upDatedUser }
+    });
+});
+exports.deleteCurrentUser = withErrorHOF(async (req, res, next) => {
+    await User.findByIdAndUpdate(req.user.id, { active: false });
+    res.status(204).json({
+        status: 'success',
+        data: null
     });
 });
 exports.addNewUser = (req, res) => {
