@@ -3,6 +3,9 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const moment = require('moment');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const tourRouter = require('./Routes/TourRoute/TourRoute');
 const userRouter = require('./Routes/UserRoute/UserRoute');
@@ -21,13 +24,32 @@ const limiter = rateLimit({
     message: 'too many request from this ip. please try again in an hour '
 });
 app.use('/api', limiter);
+// data  against nosql query injections
+app.use(mongoSanitize());
+// data against xss
+app.use(xss());
+
+// preventing parameter pollutions
+app.use(
+    hpp({
+        whitelist: [
+            'ratingsAverage',
+            'ratingsQuantity',
+            'createAt',
+            'startDates',
+            'duration',
+            'price',
+            'difficulty'
+        ]
+    })
+);
 
 // development loggin to the console
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 // parse the body from request in req.body
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 // serve static file to the cleint
 app.use(express.static(`${__dirname}/public`));
 
