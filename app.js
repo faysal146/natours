@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const moment = require('moment');
+const helmet = require('helmet');
 
 const tourRouter = require('./Routes/TourRoute/TourRoute');
 const userRouter = require('./Routes/UserRoute/UserRoute');
@@ -10,8 +11,10 @@ const globalErrorHandler = require('./Controls/ErrorControl/ErrorControl');
 
 //console.log(process.env.NODE_ENV);
 const app = express();
+// set HTTP secure header
+app.use(helmet());
 
-// global middlewere
+// limiting rate of request from same ip
 const limiter = rateLimit({
     windowMs: moment.duration(1, 'hours').asMilliseconds(),
     max: 100,
@@ -19,14 +22,16 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// development loggin to the console
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
-// parse the body from request
+// parse the body from request in req.body
 app.use(express.json());
 // serve static file to the cleint
 app.use(express.static(`${__dirname}/public`));
 
+// test middle were
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
     next();
@@ -48,21 +53,8 @@ app.all('*', (req, res, next) => {
     next(
         new ErrorHandler(`can't find ${req.originalUrl} in the server !`, 404)
     );
-    /*
-        res.status(404).json({
-            status: 'fail',
-            message: `can't find ${req.originalUrl} in the server !`
-        });
-    */
-    /*
-        const err = new Error(`can't find ${req.originalUrl} in the server !`);
-        err.statusCode = 404; // 404 not found
-        err.status = 'fail'; // 404 status 'fail
-        next(err)
-    */
 });
-// global error handle
-
+// global error hander
 app.use(globalErrorHandler);
 
 module.exports = app;
