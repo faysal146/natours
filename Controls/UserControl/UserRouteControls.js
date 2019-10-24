@@ -14,7 +14,6 @@ const filterObject = (obj, field) => {
     }
     return upDateObj;
 };
-
 exports.getAllTheUsers = withErrorHOF(async (req, res) => {
     const users = await User.find({});
     res.status(200).json({

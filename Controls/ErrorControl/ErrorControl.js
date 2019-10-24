@@ -51,7 +51,7 @@ function handleJWTError() {
 function TokenExpiredError() {
     return new ErrorHandler('Your Token Has Expired! Please Login Again', 401);
 }
-
+// err or 4 parmeter middlewere is found in express automtic take as error
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500; // 500 mean internal server error
     err.status = err.status || 'error'; // 500 status 'error'

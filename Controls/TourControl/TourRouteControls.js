@@ -18,7 +18,7 @@ exports.aliasTopTours = (req, res, next) => {
     next();
 };
 exports.getAllTours = withErrorHOF(async (req, res, next) => {
-    const apiFutures = new APIFutures(Tour.find(), req.query)
+    const apiFutures = new APIFutures(Tour.find().populate(), req.query)
         .filtering()
         .sorting()
         .limitFields()
@@ -45,6 +45,7 @@ exports.createPost = withErrorHOF(async (req, res, next) => {
         }
     });
 });
+// get one tour by the ID
 exports.getTour = withErrorHOF(async (req, res, next) => {
     const tour = await Tour.findById(req.params.id);
     // handle error if tour is not found

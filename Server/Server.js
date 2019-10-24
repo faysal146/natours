@@ -6,25 +6,30 @@ process.on('uncaughtException', err => {
     console.log(err);
     process.exit(1);
 });
-
+// config dot env file
 dotenv.config();
+
 const app = require('../app');
 
+// replacing the mongoDB connection string with Data base Password
 const DB = process.env.DATABASE.replace(
     '<PASSWORD>',
     process.env.DATABASE_PASSWORD
 );
-
+// connect the server to the mongoDB data base
 mongoose
     .connect(DB, {
         useNewUrlParser: true,
         useCreateIndex: true,
-        useFindAndModify: false
+        useFindAndModify: false,
+        useUnifiedTopology: true
     })
-    .then(() => console.log('mongo bd connect...'));
+    .then(() => console.log('mongoDB is now connected...'))
+    .catch(() => console.log('some how mongoDB is not able to connect...'));
 
 const PORT = process.env.PORT || 3000;
 
+// start the server
 const server = app.listen(PORT, () => {
     console.log('server is running.....');
 });
@@ -32,7 +37,7 @@ const server = app.listen(PORT, () => {
 // if any unhandle promise
 process.on('unhandledRejection', err => {
     // console.log(err.message, err.name);
-    console.log(err);
+    console.log(err.message);
     console.log('Unhandled Rejection Shutting Down...');
     server.close(() => process.exit(1));
 });

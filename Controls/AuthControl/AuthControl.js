@@ -21,7 +21,7 @@ const sendResponse = ({ res, statusCode, token, user }) => {
         httpOnly: true
     };
     if (process.env.NODE_ENV === 'production') options.secure = true;
-    
+
     user.password = undefined;
     user.active = undefined;
 
@@ -53,13 +53,13 @@ exports.login = withErrorHOF(async (req, res, next) => {
     }
     // check if User exists and password is correct or match
     const user = await User.findOne({ email }).select('+password');
-
+    
     if (!user || !(await user.correctPassword(password, user.password))) {
         return next(new ErrorHandler('Incorrect Email and Password', 401)); // 401 mean unatuh
     }
     // if everything ok send response to the client
     const token = authToken(user._id);
-    sendResponse({ res, token });
+    sendResponse({ res, token, user });
 });
 exports.protectRoute = withErrorHOF(async (req, res, next) => {
     let token;

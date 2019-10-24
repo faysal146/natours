@@ -10,9 +10,27 @@ mongoose.connect(DB, {
     useCreateIndex: true,
     useFindAndModify: false
 });
-
-const data = JSON.parse(fs.readFileSync('./tours-simple.json', 'utf-8'));
-
+const path = './tours.json';
+const data = JSON.parse(fs.readFileSync(path, 'utf-8'));
+/*
+Tour.deleteMany({})
+    .then(() => {
+        console.log('all tour are deleted');
+        process.exit();
+    })
+    .catch(() => {
+        process.exit();
+        console.log('something went wrong...');
+    });
+*/
+/*
 Tour.insertMany([...data])
-    .then(dt => console.log(dt))
-    .catch(err => console.log(err));
+    .then(dt => {
+        console.log('tour is add');
+        process.exit();
+    })
+    .catch(err => {
+        console.log('tour is not add');
+        process.exit();
+    });
+*/

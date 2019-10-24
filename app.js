@@ -9,11 +9,14 @@ const hpp = require('hpp');
 
 const tourRouter = require('./Routes/TourRoute/TourRoute');
 const userRouter = require('./Routes/UserRoute/UserRoute');
+const reviewRouter = require('./Routes/ReviewRoute/ReviewRoute');
 const ErrorHandler = require('./Utils/ErrorHandler');
-const globalErrorHandler = require('./Controls/ErrorControl/ErrorControl');
+const globalErrorControl = require('./Controls/ErrorControl/ErrorControl');
 
 //console.log(process.env.NODE_ENV);
+
 const app = express();
+
 // set HTTP secure header
 app.use(helmet());
 
@@ -21,12 +24,14 @@ app.use(helmet());
 const limiter = rateLimit({
     windowMs: moment.duration(1, 'hours').asMilliseconds(),
     max: 100,
-    message: 'too many request from this ip. please try again in an hour '
+    message: 'Too many request from this ip. please try again in an hour '
 });
 app.use('/api', limiter);
-// data  against nosql query injections
+
+// data Sanitize against noSQL query injections
 app.use(mongoSanitize());
-// data against xss
+
+// data Sanitize against cross side scripting attack
 app.use(xss());
 
 // preventing parameter pollutions
@@ -48,8 +53,10 @@ app.use(
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
+
 // parse the body from request in req.body
 app.use(express.json({ limit: '10kb' }));
+
 // serve static file to the cleint
 app.use(express.static(`${__dirname}/public`));
 
@@ -62,6 +69,7 @@ app.use((req, res, next) => {
 // Route Middle were
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 // unhandle route
 app.all('*', (req, res, next) => {
@@ -77,6 +85,6 @@ app.all('*', (req, res, next) => {
     );
 });
 // global error hander
-app.use(globalErrorHandler);
+app.use(globalErrorControl);
 
 module.exports = app;
