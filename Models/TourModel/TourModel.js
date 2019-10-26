@@ -107,6 +107,7 @@ const tourSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
+        // child refarcing
         guides: [
             {
                 type: mongoose.Schema.ObjectId,
@@ -129,6 +130,12 @@ const tourSchema = new mongoose.Schema(
 */
 tourSchema.virtual('durationWeeks').get(function() {
     return this.duration / 7;
+});
+// virtual populations
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+    foreignField: 'tour',
+    localField: '_id'
 });
 
 //mongoose middle were

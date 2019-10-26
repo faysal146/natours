@@ -1,6 +1,7 @@
 const User = require('../../Models/UserModel/UserModel');
 const withErrorHOF = require('../../Utils/ErrorHOF');
 const ErrorHandler = require('../../Utils/ErrorHandler');
+const factoryHandler = require('../FactoryHandler/FactoryHandler');
 
 const filterObject = (obj, field) => {
     // 1 obj should be obj
@@ -75,9 +76,5 @@ exports.upDateUser = (req, res) => {
         message: 'this page is under construction'
     });
 };
-exports.deleteUser = withErrorHOF(async (req, res) => {
-    res.status(500).json({
-        status: 'fail',
-        message: 'this page is under construction'
-    });
-});
+exports.deleteUser = factoryHandler.deleteOne(User)
+

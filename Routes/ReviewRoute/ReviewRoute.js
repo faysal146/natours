@@ -1,21 +1,23 @@
 const express = require('express');
-const auth = require('../../Controls/AuthControl/AuthControl');
+const authControl = require('../../Controls/AuthControl/AuthControl');
 const reviewControl = require('../../Controls/ReviewControl/ReviewControl');
 
-const reviewRouter = express.Router();
+// margin all the route parmas
+const reviewRouter = express.Router({ mergeParams: true });
 
 reviewRouter
     .route('/')
-    .get(auth.protectRoute, reviewControl.getAllReview)
+    .get(authControl.protectRoute, reviewControl.getAllReview)
     .post(
-        auth.protectRoute,
-        auth.restrictTo('user'),
+        authControl.protectRoute,
+        authControl.restrictTo('user'),
+        reviewControl.addTourAndUserIds,
         reviewControl.createReview
     );
-// router
-//     .route('/:id')
-//     .get(auth.protectRoute, reviewControl.getOneReview)
-//     .patch(auth.protectRoute, reviewControl.updateReview)
-//     .delete(auth.protectRoute, reviewControl.deleteReview);
+//   /api/v1/reviews   in the app
+reviewRouter
+    .route('/:id')
+    .delete(reviewControl.deleteReview)
+    .patch(reviewControl.updateReview);
 
 module.exports = reviewRouter;

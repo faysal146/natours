@@ -16,6 +16,7 @@ const reviewsSchema = new mongoose.Schema(
             type: Date,
             default: Date.now
         },
+        // parent refrancing
         tour: {
             type: mongoose.Schema.ObjectId,
             ref: 'Tour',
@@ -33,20 +34,11 @@ const reviewsSchema = new mongoose.Schema(
     }
 );
 
+// the query middlewere for vaitule populated user field
 reviewsSchema.pre(/^find/, function(next) {
     this.populate({
-        path: 'tour',
-        select: 'name'
-    }).populate({
         path: 'user',
-        select: 'name photo'
-    });
-    next();
-});
-
-reviewsSchema.pre(/^find/, function(next) {
-    this.populate({
-        path: 'user'
+        select: { name: 1, photo: 1 }
     });
     next();
 });

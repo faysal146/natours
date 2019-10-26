@@ -1,5 +1,6 @@
 const Tour = require('../../Models/TourModel/TourModel');
 const APIFutures = require('../../Utils/APIFutute');
+const factoryHandler = require('../FactoryHandler/FactoryHandler');
 const withErrorHOF = require('../../Utils/ErrorHOF');
 const ErrorHandler = require('../../Utils/ErrorHandler');
 
@@ -34,20 +35,9 @@ exports.getAllTours = withErrorHOF(async (req, res, next) => {
         }
     });
 });
-exports.createPost = withErrorHOF(async (req, res, next) => {
-    //     let newTour = await new Tour(req.body);
-    //     newTour = await newTour.save();
-    const newTour = await Tour.create(req.body);
-    res.status(201).json({
-        status: 'success',
-        data: {
-            tour: newTour
-        }
-    });
-});
 // get one tour by the ID
 exports.getTour = withErrorHOF(async (req, res, next) => {
-    const tour = await Tour.findById(req.params.id);
+    const tour = await Tour.findById(req.params.id).populate('reviews');
     // handle error if tour is not found
     if (!tour) {
         return next(new ErrorHandler(`can't find tour with that ID `, 404));
@@ -60,31 +50,11 @@ exports.getTour = withErrorHOF(async (req, res, next) => {
         }
     });
 });
-exports.upDateTour = withErrorHOF(async (req, res, next) => {
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true
-    });
-    if (!tour) {
-        return next(new ErrorHandler(`can't find tour with that ID `, 404));
-    }
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour
-        }
-    });
-});
-exports.deleteTour = withErrorHOF(async (req, res, next) => {
-    const tour = await Tour.findByIdAndDelete(req.params.id);
-    if (!tour) {
-        return next(new ErrorHandler(`can't find tour with that ID `, 404));
-    }
-    res.status(204).json({
-        status: 'success',
-        data: null
-    });
-});
+
+exports.createPost = factoryHandler.createOne(Tour);
+exports.upDateTour = factoryHandler.updateOne(Tour);
+exports.deleteTour = factoryHandler.deleteOne(Tour);
+
 exports.toursStatus = withErrorHOF(async (req, res, next) => {
     const tour = await Tour.aggregate([
         {

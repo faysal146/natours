@@ -1,10 +1,12 @@
-const moment = require('moment');
 const Review = require('../../Models/ReviewModel/ReviewModel');
 const withErrorHOF = require('../../Utils/ErrorHOF');
 const ErrorHandler = require('../../Utils/ErrorHandler');
+const factoryHandler = require('../FactoryHandler/FactoryHandler');
 
 exports.getAllReview = withErrorHOF(async (req, res, next) => {
-    const reviews = await Review.find({});
+    let filter = {};
+    if (req.params.tourId) filter = { tour: req.params.tourId };
+    const reviews = await Review.find(filter);
 
     res.status(200).json({
         status: 'success',
@@ -27,43 +29,12 @@ exports.getOneReview = withErrorHOF(async (req, res, next) => {
         }
     });
 });
-exports.createReview = withErrorHOF(async (req, res, next) => {
-    const review = await Review.create(req.body);
-    res.status(201).json({
-        status: 'success',
-        data: {
-            review
-        }
-    });
-});
-exports.deleteReview = withErrorHOF(async (req, res, next) => {
-    const { id } = req.params;
-    const review = await Review.findByIdAndDelete(id);
+exports.addTourAndUserIds = (req, res, next) => {
+    if (!req.body.tour) req.body.tour = req.params.tourId;
+    if (!req.body.user) req.body.user = req.user.id;
+    next();
+};
 
-    if (!review) {
-        return next(
-            new ErrorHandler('sorry review is not found by given id ', 400)
-        );
-    }
-    res.status(204).json({
-        status: 'success',
-        data: null
-    });
-});
-exports.updateReview = withErrorHOF(async (req, res, next) => {
-    const { id } = req.params;
-    const review = await Review.findByIdAndUpdate(id, req.body, {
-        new: true,
-        runValidators: true
-    });
-    if (!review) {
-        return next(
-            new ErrorHandler('sorry review is not found by given id ', 400)
-        );
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: { review }
-    });
-});
+exports.createReview = factoryHandler.createOne(Review)
+exports.deleteReview = factoryHandler.deleteOne(Review);
+exports.updateReview = factoryHandler.updateOne(Review);
