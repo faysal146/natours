@@ -7,18 +7,27 @@ const reviewRouter = express.Router({ mergeParams: true });
 
 reviewRouter
     .route('/')
-    .get(authControl.protectRoute, reviewControl.getAllReview)
+    .get(reviewControl.getAllReview)
     .post(
         authControl.protectRoute,
         authControl.restrictTo('user'),
         reviewControl.addTourAndUserIds,
         reviewControl.createReview
     );
+
 //   /api/v1/reviews/kjdkjfkdjfkdj
 reviewRouter
     .route('/:id')
     .get(reviewControl.getOneReview)
-    .patch(reviewControl.updateReview)
-    .delete(reviewControl.deleteReview);
+    .patch(
+        authControl.protectRoute,
+        authControl.restrictTo('admin', 'user'),
+        reviewControl.updateReview
+    )
+    .delete(
+        authControl.protectRoute,
+        authControl.restrictTo('admin', 'user'),
+        reviewControl.deleteReview
+    );
 
 module.exports = reviewRouter;

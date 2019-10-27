@@ -13,7 +13,11 @@ tourRouter.use('/:tourId/reviews', reviewRoute);
 tourRouter.route('/tours-status').get(tourRouterControls.toursStatus);
 tourRouter
     .route('/get-mountly-tours/:year')
-    .get(tourRouterControls.getMountlyTour);
+    .get(
+        authControl.protectRoute,
+        authControl.restrictTo('admin', 'lead-guide', 'guide'),
+        tourRouterControls.getMountlyTour
+    );
 
 tourRouter //apply middlewere => aliasTopTours
     .route('/top-5-tours')
@@ -21,13 +25,21 @@ tourRouter //apply middlewere => aliasTopTours
 
 tourRouter
     .route('/')
-    .get(authControl.protectRoute, tourRouterControls.getAllTours)
-    .post(tourRouterControls.createPost);
+    .get(tourRouterControls.getAllTours)
+    .post(
+        authControl.protectRoute,
+        authControl.restrictTo('admin', 'lead-guide'),
+        tourRouterControls.createPost
+    );
 
 tourRouter
     .route('/:id')
     .get(tourRouterControls.getTour)
-    .patch(tourRouterControls.upDateTour)
+    .patch(
+        authControl.protectRoute,
+        authControl.restrictTo('admin', 'lead-guide'),
+        tourRouterControls.upDateTour
+    )
     .delete(
         authControl.protectRoute,
         authControl.restrictTo('admin', 'lead-guide'),

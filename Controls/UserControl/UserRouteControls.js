@@ -4,7 +4,7 @@ const ErrorHandler = require('../../Utils/ErrorHandler');
 const factoryHandler = require('../FactoryHandler/FactoryHandler');
 
 const filterObject = (obj, field) => {
-    // 1 obj should be obj
+    // 1 obj should be object
     // 2 field should be array
     const upDateObj = {};
     // eslint-disable-next-line no-restricted-syntax
@@ -15,16 +15,16 @@ const filterObject = (obj, field) => {
     }
     return upDateObj;
 };
-exports.getAllTheUsers = withErrorHOF(async (req, res) => {
-    const users = await User.find({});
-    res.status(200).json({
-        status: 'success',
-        data: {
-            users
-        }
-    });
-});
-exports.updateCurrentUserData = withErrorHOF(async (req, res, next) => {
+exports.getAllTheUsers = factoryHandler.getAll(User);
+
+exports.getMe = (req, res, next) => {
+    req.params.id = req.user.id;
+    next();
+};
+
+exports.getUser = factoryHandler.getOne(User);
+
+exports.updateMe = withErrorHOF(async (req, res, next) => {
     // 1) check if password is change with this route
     if (req.body.password || req.body.confirmPassword) {
         return next(
@@ -51,7 +51,7 @@ exports.updateCurrentUserData = withErrorHOF(async (req, res, next) => {
         data: { user: upDatedUser }
     });
 });
-exports.deleteCurrentUser = withErrorHOF(async (req, res, next) => {
+exports.deleteMe = withErrorHOF(async (req, res, next) => {
     await User.findByIdAndUpdate(req.user.id, { active: false });
     res.status(204).json({
         status: 'success',
@@ -61,13 +61,7 @@ exports.deleteCurrentUser = withErrorHOF(async (req, res, next) => {
 exports.addNewUser = (req, res) => {
     res.status(500).json({
         status: 'fail',
-        message: 'this page is under construction'
-    });
-};
-exports.getUser = (req, res) => {
-    res.status(500).json({
-        status: 'fail',
-        message: 'this page is under construction'
+        message: 'please singup'
     });
 };
 exports.upDateUser = (req, res) => {
@@ -76,5 +70,4 @@ exports.upDateUser = (req, res) => {
         message: 'this page is under construction'
     });
 };
-exports.deleteUser = factoryHandler.deleteOne(User)
-
+exports.deleteUser = factoryHandler.deleteOne(User);

@@ -138,6 +138,10 @@ tourSchema.virtual('reviews', {
     localField: '_id'
 });
 
+// index for better performace and faster query
+tourSchema.index({ price: 1, ratingsAverage: 1 });
+tourSchema.index({ slug: 1 });
+
 //mongoose middle were
 // run before .save() and .create() only not find other method
 // slugify the title using middlewere
