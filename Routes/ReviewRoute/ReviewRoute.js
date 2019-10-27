@@ -14,10 +14,11 @@ reviewRouter
         reviewControl.addTourAndUserIds,
         reviewControl.createReview
     );
-//   /api/v1/reviews   in the app
+//   /api/v1/reviews/kjdkjfkdjfkdj
 reviewRouter
     .route('/:id')
-    .delete(reviewControl.deleteReview)
-    .patch(reviewControl.updateReview);
+    .get(reviewControl.getOneReview)
+    .patch(reviewControl.updateReview)
+    .delete(reviewControl.deleteReview);
 
 module.exports = reviewRouter;
