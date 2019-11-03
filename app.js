@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -10,12 +11,19 @@ const hpp = require('hpp');
 const tourRouter = require('./Routes/TourRoute/TourRoute');
 const userRouter = require('./Routes/UserRoute/UserRoute');
 const reviewRouter = require('./Routes/ReviewRoute/ReviewRoute');
+const viewRouter = require('./Routes/ViewRoute/ViewRoute');
 const ErrorHandler = require('./Utils/ErrorHandler');
-const globalErrorControl = require('./Controls/ErrorControl/ErrorControl');
+const globalErrorControl = require('./Controls/ErrorController/ErrorController');
 
 //console.log(process.env.NODE_ENV);
 
 const app = express();
+
+// templating engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'Views'));
+// serve static file to the cleint
+app.use(express.static(path.join(__dirname, 'public')));
 
 // set HTTP secure header
 app.use(helmet());
@@ -37,15 +45,7 @@ app.use(xss());
 // preventing parameter pollutions
 app.use(
     hpp({
-        whitelist: [
-            'ratingsAverage',
-            'ratingsQuantity',
-            'createAt',
-            'startDates',
-            'duration',
-            'price',
-            'difficulty'
-        ]
+        whitelist: ['ratingsAverage', 'ratingsQuantity', 'createAt', 'startDates', 'duration', 'price', 'difficulty']
     })
 );
 
@@ -57,9 +57,6 @@ if (process.env.NODE_ENV === 'development') {
 // parse the body from request in req.body
 app.use(express.json({ limit: '10kb' }));
 
-// serve static file to the cleint
-app.use(express.static(`${__dirname}/public`));
-
 // test middle were
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
@@ -70,8 +67,9 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
-
+app.use('/', viewRouter);
 // unhandle route
+
 app.all('*', (req, res, next) => {
     /*
         handler error with custom error handler
@@ -80,9 +78,7 @@ app.all('*', (req, res, next) => {
         it is automatic call the global error
         and skip all other middlewere
     */
-    next(
-        new ErrorHandler(`can't find ${req.originalUrl} in the server !`, 404)
-    );
+    next(new ErrorHandler(`can't find ${req.originalUrl} in the server !`, 404));
 });
 // global error hander
 app.use(globalErrorControl);

@@ -34,7 +34,8 @@ const tourSchema = new mongoose.Schema(
         ratingsAverage: {
             type: Number,
             default: 0,
-            max: [5, 'rating must be below 5.0']
+            max: [5, 'rating must be below 5.0'],
+            set: val => Math.round(val * 10) / 10 // 4.6666 ==> 4.7
         },
         ratingsQuantity: {
             type: Number,
@@ -51,8 +52,7 @@ const tourSchema = new mongoose.Schema(
                 validator: function(value) {
                     return value < this.price;
                 },
-                message:
-                    'Discount Price ({value}) should be below regular price'
+                message: 'Discount Price ({value}) should be below regular price'
             }
         },
         summary: {
@@ -140,6 +140,7 @@ tourSchema.virtual('reviews', {
 // index for better performace and faster query
 tourSchema.index({ price: 1, ratingsAverage: 1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 //mongoose middle were
 // run before .save() and .create() only not find other method
@@ -181,10 +182,11 @@ tourSchema.pre(/^find/, function(next) {
 */
 
 // aggregation middle were
-tourSchema.pre('aggregate', function(next) {
-    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-    next();
-});
+// tourSchema.pre('aggregate', function(next) {
+//     console.log(this.pipeline())
+//     this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//     next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 

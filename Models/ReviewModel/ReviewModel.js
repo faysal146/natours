@@ -34,6 +34,8 @@ const reviewsSchema = new mongoose.Schema(
         toObject: { virtuals: true }
     }
 );
+// index and achive the uniqueness
+reviewsSchema.index({ user: 1, tour: 1 }, { unique: true });
 
 // the query middlewere for vaitule populated user field
 reviewsSchema.pre(/^find/, function(next) {
@@ -59,15 +61,33 @@ reviewsSchema.statics.calcAvgRatings = async function(tourId) {
             }
         }
     ]);
-    const { ratingsQuantity, ratingsAverage } = stats[0];
-    await Tour.findByIdAndUpdate(tourId, {
-        ratingsAverage,
-        ratingsQuantity
-    });
+    if (stats.length > 0) {
+        const { ratingsQuantity, ratingsAverage } = stats[0];
+        await Tour.findByIdAndUpdate(tourId, {
+            ratingsAverage,
+            ratingsQuantity
+        });
+    } else {
+        await Tour.findByIdAndUpdate(tourId, {
+            ratingsAverage: 0,
+            ratingsQuantity: 0
+        });
+    }
 };
 
 reviewsSchema.post('save', function() {
     this.constructor.calcAvgRatings(this.tour); //  tour id
+});
+
+// findByIdAndUpdate
+// findByIdAndDelete
+reviewsSchema.pre(/findOneAnd/, async function(next) {
+    this.reviewUpdate = await this.findOne();
+    next();
+});
+reviewsSchema.post(/findOneAnd/, async function() {
+    // await this.findOne(); does not work in here
+    await this.reviewUpdate.constructor.calcAvgRatings(this.reviewUpdate.tour);
 });
 
 const Review = mongoose.model('Review', reviewsSchema);

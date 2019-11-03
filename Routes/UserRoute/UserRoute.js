@@ -1,31 +1,31 @@
 const express = require('express');
-const userRouterControls = require('../../Controls/UserControl/UserRouteControls');
-const authControl = require('../../Controls/AuthControl/AuthControl');
+const userController = require('../../Controls/UserController/UserController');
+const authController = require('../../Controls/AuthController/AuthController');
 
 const userRouter = express.Router();
 // all the of the route open for every one
-userRouter.post('/singup', authControl.singUp);
-userRouter.post('/login', authControl.login);
-userRouter.post('/forgot-password', authControl.forgotPassword);
-userRouter.patch('/reset-password/:resetToken', authControl.resetPassword);
+userRouter.post('/singup', authController.singUp);
+userRouter.post('/login', authController.login);
+userRouter.post('/forgot-password', authController.forgotPassword);
+userRouter.patch('/reset-password/:resetToken', authController.resetPassword);
 
 // protect all the are now portect
-userRouter.use(authControl.protectRoute);
-userRouter.patch('/update-password', authControl.upDatePassword);
-userRouter.patch('/update-account', userRouterControls.updateMe);
-userRouter.delete('/delete-account', userRouterControls.deleteMe);
-userRouter.get('/me', userRouterControls.getMe, userRouterControls.getUser);
+userRouter.use(authController.protectRoute);
+userRouter.patch('/update-password', authController.upDatePassword);
+userRouter.patch('/update-account', userController.updateMe);
+userRouter.delete('/delete-account', userController.deleteMe);
+userRouter.get('/me', userController.getMe, userController.getUser);
 
 // all of route restrict to admin
-userRouter.use(authControl.restrictTo('admin'));
+userRouter.use(authController.restrictTo('admin'));
 userRouter
     .route('/')
-    .get(userRouterControls.getAllTheUsers)
-    .post(userRouterControls.addNewUser);
+    .get(userController.getAllTheUsers)
+    .post(userController.addNewUser);
 userRouter
     .route('/:id')
-    .get(userRouterControls.getUser)
-    .patch(userRouterControls.upDateUser)
-    .delete(userRouterControls.deleteUser);
+    .get(userController.getUser)
+    .patch(userController.upDateUser)
+    .delete(userController.deleteUser);
 
 module.exports = userRouter;

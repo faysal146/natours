@@ -1,5 +1,5 @@
 const User = require('../../Models/UserModel/UserModel');
-const withErrorHOF = require('../../Utils/ErrorHOF');
+const catchError = require('../../Utils/catchError');
 const ErrorHandler = require('../../Utils/ErrorHandler');
 const factoryHandler = require('../FactoryHandler/FactoryHandler');
 
@@ -24,34 +24,25 @@ exports.getMe = (req, res, next) => {
 
 exports.getUser = factoryHandler.getOne(User);
 
-exports.updateMe = withErrorHOF(async (req, res, next) => {
+exports.updateMe = catchError(async (req, res, next) => {
     // 1) check if password is change with this route
     if (req.body.password || req.body.confirmPassword) {
-        return next(
-            new ErrorHandler(
-                'sorry this route is not for changing the password please use /user/update-password route',
-                400
-            )
-        );
+        return next(new ErrorHandler('sorry this route is not for changing the password please use /user/update-password route', 400));
     }
     // 2) update the user data
     const field = ['email', 'name'];
     const filterOutBody = filterObject(req.body, field);
-    const upDatedUser = await User.findByIdAndUpdate(
-        req.user.id,
-        filterOutBody,
-        {
-            new: true,
-            runValidators: true
-        }
-    );
+    const upDatedUser = await User.findByIdAndUpdate(req.user.id, filterOutBody, {
+        new: true,
+        runValidators: true
+    });
     // 3) send back the response
     res.status(200).json({
         status: 'success',
         data: { user: upDatedUser }
     });
 });
-exports.deleteMe = withErrorHOF(async (req, res, next) => {
+exports.deleteMe = catchError(async (req, res, next) => {
     await User.findByIdAndUpdate(req.user.id, { active: false });
     res.status(204).json({
         status: 'success',

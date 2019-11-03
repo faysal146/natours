@@ -25,7 +25,10 @@ mongoose
         useUnifiedTopology: true
     })
     .then(() => console.log('mongoDB is now connected...'))
-    .catch(() => console.log('some how mongoDB is not able to connect...'));
+    .catch(() => {
+        console.log('some how mongoDB is not able to connect...');
+        process.exit();
+    });
 
 const PORT = process.env.PORT || 3000;
 

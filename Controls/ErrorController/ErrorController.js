@@ -1,4 +1,4 @@
-const ErrorHandler = require('../../Utils/ErrorHandler');
+const catchError = require('../../Utils/catchError');
 
 // Error Message when Development
 function sendErrorDev(err, res) {
@@ -29,27 +29,25 @@ function sendErrorProd(err, res) {
 // handle Data Base Cast Error
 function handleCaseErrorDB(err) {
     const message = `Invalid ${err.path} : ${err.value}`;
-    return new ErrorHandler(message, 400);
+    return new catchError(message, 400);
 }
 // handle Duplicate Fields Name
 function handleDuplicateFieldsDB(err) {
     const value = err.errmsg.match(/"(.*?)"/g)[0];
     const message = `Duplicate Fidels value ${value}. Please use another Value `;
-    return new ErrorHandler(message, 400);
+    return new catchError(message, 400);
 }
 // handler MongoDB validation Error
 function handleValidationDB(err) {
-    const error = Object.values(err.errors).reduce(
-        (acc, val) => `${acc}. ${val}`
-    );
-    return new ErrorHandler(error, 400);
+    const error = Object.values(err.errors).reduce((acc, val) => `${acc}. ${val}`);
+    return new catchError(error, 400);
 }
 // handle JWT token error
 function handleJWTError() {
-    return new ErrorHandler('Invalid Token! Please Login Again', 401);
+    return new catchError('Invalid Token! Please Login Again', 401);
 }
 function TokenExpiredError() {
-    return new ErrorHandler('Your Token Has Expired! Please Login Again', 401);
+    return new catchError('Your Token Has Expired! Please Login Again', 401);
 }
 // err or 4 parmeter middlewere is found in express automtic take as error
 module.exports = (err, req, res, next) => {
