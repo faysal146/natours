@@ -56,19 +56,24 @@ exports.login = catchError(async (req, res, next) => {
 });
 exports.protectRoute = catchError(async (req, res, next) => {
     let token;
-    // 1) getting token and check it is valid or not
+    // 1) getting token from authorization header and check it is valid or not
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+        // getting token from cookies
+    } else if (req.cookies.token) {
+        // eslint-disable-next-line prefer-destructuring
+        token = req.cookies.token;
     }
     // 2) verification the token
     if (!token || !validator.isJWT(token)) {
         return next(
             new ErrorHandler(
                 'you are not logged in! please login or create new Account',
-                401 // unauth
+                401 // unauthorization
             )
         );
     }
+    // decode the token and get user info to check about user
     const decoded = await promisify(jwt.verify)(token, process.env.SECRET_KEY);
 
     // 3) check if user still exists
@@ -89,6 +94,39 @@ exports.protectRoute = catchError(async (req, res, next) => {
     // call the next middlewere
     next();
 });
+
+exports.isLoggedin = catchError(async (req, res, next) => {
+    // 1) getting token from cookies and check it is valid or not
+    if (req.cookies.token && validator.isJWT(req.cookies.token)) {
+        // eslint-disable-next-line prefer-destructuring
+        // 2) verification the token
+        const decoded = await promisify(jwt.verify)(req.cookies.token, process.env.SECRET_KEY);
+        // 3) check if user still exists
+        const currentUser = await User.findById(decoded.id);
+        if (!currentUser) {
+            // if no user call the next middlewere and stop excuting this function
+            return next();
+        }
+        // 4) check if user chenge password after token was issued
+        if (await currentUser.passwordChangeAt(decoded.iat)) {
+            // if user change his/her password stop excuted this function call the next middlewere
+            return next();
+        }
+        /*
+            if exctuing reach this line mean there is loggedin user.
+            so put the loggedin user data to the res.locals object
+
+            locals is spacial object that get access to the every pug template.
+            put current user in locals object to get access user in the pug template
+        */
+        res.locals.user = currentUser;
+        next();
+    } else {
+        // if there is no cookies call the next middlewere
+        next();
+    }
+});
+
 exports.restrictTo = (...roles) => {
     return catchError(async (req, res, next) => {
         // role is array of list the contains is type of user role

@@ -24,3 +24,10 @@ exports.getTour = catchError(async (req, res, next) => {
         tour
     });
 });
+const sendPage = (temp, res) => {
+    res.status(200).render(temp,{
+        title: 'Login'
+    });
+}
+exports.getLoginFrom = (_, res) => sendPage('Login', res);
+exports.getSingupFrom = (_, res) => sendPage('Singup', res);
