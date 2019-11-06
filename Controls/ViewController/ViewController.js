@@ -1,6 +1,6 @@
 const Tour = require('../../Models/TourModel/TourModel');
 const catchError = require('../../Utils/catchError');
-//const ErrorHandler = require('../../Utils/ErrorHandler');
+const ErrorHandler = require('../../Utils/ErrorHandler');
 
 exports.getOverView = catchError(async (req, res, next) => {
     // 1) get all tour from the data base
@@ -18,6 +18,9 @@ exports.getTour = catchError(async (req, res, next) => {
         path: 'reviews',
         fields: 'review rating user'
     });
+    if(!tour) {
+        return next(new ErrorHandler('no tour found with this name!',404))
+    }
     // 2) build the template and render it
     res.status(200).render('Tour', {
         title: tour.name,

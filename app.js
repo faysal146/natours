@@ -63,9 +63,10 @@ app.use(cookieParser());
 // test middle were
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
-    console.log(req.cookies)
+    console.log('cookie ==> ', req.cookies);
     next();
 });
+console.log(process.env.NODE_ENV);
 
 // Route Middle were
 app.use('/api/v1/tours', tourRouter);

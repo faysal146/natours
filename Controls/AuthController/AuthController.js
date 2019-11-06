@@ -8,57 +8,40 @@ const catchError = require('../../Utils/catchError');
 const ErrorHandler = require('../../Utils/ErrorHandler');
 const sendMail = require('../../Utils/SendMailer');
 
-const authToken = id =>
-    jwt.sign({ id }, process.env.SECRET_KEY, {
+const authToken = id => {
+    // sing in user bia jwt singin
+    return jwt.sign({ id }, process.env.SECRET_KEY, {
         expiresIn: process.env.TOKEN_EXPIRED
     });
-
+};
 const sendResponse = ({ res, statusCode, token, user }) => {
     const options = {
         expires: new Date(Date.now() + moment.duration(90, 'days').asMilliseconds()),
         httpOnly: true
     };
+    // in production secure is enable
     if (process.env.NODE_ENV === 'production') options.secure = true;
-
+    /*
+        remove the password and active field from the response object
+    */
     user.password = undefined;
     user.active = undefined;
 
+    // send token via cookie
     res.cookie('token', token, options);
+    // send response
     res.status(statusCode || 200).json({
         status: 'success',
         token,
         data: { user }
     });
 };
-exports.singUp = catchError(async (req, res, next) => {
-    const newUser = { ...req.body };
-    newUser.changePasswordAt = moment().toISOString();
-    const addNewUser = await User.create(newUser);
-    const token = authToken(addNewUser._id);
-    sendResponse({ res, statusCode: 201, token, user: addNewUser });
-});
-exports.login = catchError(async (req, res, next) => {
-    const { email, password } = req.body;
-    // check email and password valid or not
-    // min password length 6 from ==> userModel.js file
-    if (!validator.isEmail(email) || !validator.isLength(password, { min: 6 })) {
-        return next(new ErrorHandler('Please Provide Valid Email And Password', 400));
-    }
-    // check if User exists and password is correct or match
-    const user = await User.findOne({ email }).select('+password');
-
-    if (!user || !(await user.correctPassword(password, user.password))) {
-        return next(new ErrorHandler('Incorrect Email and Password', 401)); // 401 mean unatuh
-    }
-    // if everything ok send response to the client
-    const token = authToken(user._id);
-    sendResponse({ res, token, user });
-});
 exports.protectRoute = catchError(async (req, res, next) => {
     let token;
+    const { authorization } = req.headers;
     // 1) getting token from authorization header and check it is valid or not
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1];
+    if (authorization && authorization.startsWith('Bearer')) {
+        token = authorization.split(' ')[1];
         // getting token from cookies
     } else if (req.cookies.token) {
         // eslint-disable-next-line prefer-destructuring
@@ -94,39 +77,6 @@ exports.protectRoute = catchError(async (req, res, next) => {
     // call the next middlewere
     next();
 });
-
-exports.isLoggedin = catchError(async (req, res, next) => {
-    // 1) getting token from cookies and check it is valid or not
-    if (req.cookies.token && validator.isJWT(req.cookies.token)) {
-        // eslint-disable-next-line prefer-destructuring
-        // 2) verification the token
-        const decoded = await promisify(jwt.verify)(req.cookies.token, process.env.SECRET_KEY);
-        // 3) check if user still exists
-        const currentUser = await User.findById(decoded.id);
-        if (!currentUser) {
-            // if no user call the next middlewere and stop excuting this function
-            return next();
-        }
-        // 4) check if user chenge password after token was issued
-        if (await currentUser.passwordChangeAt(decoded.iat)) {
-            // if user change his/her password stop excuted this function call the next middlewere
-            return next();
-        }
-        /*
-            if exctuing reach this line mean there is loggedin user.
-            so put the loggedin user data to the res.locals object
-
-            locals is spacial object that get access to the every pug template.
-            put current user in locals object to get access user in the pug template
-        */
-        res.locals.user = currentUser;
-        next();
-    } else {
-        // if there is no cookies call the next middlewere
-        next();
-    }
-});
-
 exports.restrictTo = (...roles) => {
     return catchError(async (req, res, next) => {
         // role is array of list the contains is type of user role
@@ -141,6 +91,77 @@ exports.restrictTo = (...roles) => {
         // other wise call next
         next();
     });
+};
+exports.singUp = catchError(async (req, res, next) => {
+    // todo
+    // check body
+
+    const newUser = { ...req.body };
+    newUser.changePasswordAt = moment().toISOString();
+    const addNewUser = await User.create(newUser);
+    const token = authToken(addNewUser._id);
+    sendResponse({ res, statusCode: 201, token, user: addNewUser });
+});
+exports.login = catchError(async (req, res, next) => {
+    const { email, password } = req.body;
+    // check email and password valid or not
+    // min password length 6 from ==> userModel.js file
+    if (!validator.isEmail(email) || !validator.isLength(password, { min: 6 })) {
+        return next(new ErrorHandler('Please Provide Valid Email And Password', 400));
+    }
+    // check if User exists and password is correct or match
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user || !(await user.correctPassword(password, user.password))) {
+        return next(new ErrorHandler('Incorrect Email and Password', 401));
+        // 401 mean unatuh
+    }
+    // if everything ok send response to the client
+    const token = authToken(user._id);
+    sendResponse({ res, token, user });
+});
+exports.isLoggedin = async (req, res, next) => {
+    // 1) getting token from cookies and check it is valid or not
+    if (req.cookies.token && validator.isJWT(req.cookies.token)) {
+        // eslint-disable-next-line prefer-destructuring
+        try {
+            // 2) verification the token
+            const decoded = await promisify(jwt.verify)(req.cookies.token, process.env.SECRET_KEY);
+
+            // 3) check if user still exists
+            const currentUser = await User.findById(decoded.id);
+            if (!currentUser) {
+                // if no user call the next middlewere and stop excuting this function
+                return next();
+            }
+            // 4) check if user chenge password after token was issued
+            if (await currentUser.passwordChangeAt(decoded.iat)) {
+                // if user change his/her password stop excuted this function call the next middlewere
+                return next();
+            }
+            /*
+            if exctuing reach this line mean there is loggedin user.
+            so put the loggedin user data to the res.locals object
+
+            locals is spacial object that get access to the every pug template.
+            put current user in locals object to get access user in the pug template
+        */
+            res.locals.user = currentUser;
+            next();
+        } catch (err) {
+            next();
+        }
+    } else {
+        // if there is no cookies call the next middlewere
+        next();
+    }
+};
+exports.loggOut = (req, res, next) => {
+    res.cookie('token', 'loggedout', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+    res.status(200).json({ status: 'success' });
 };
 exports.forgotPassword = catchError(async (req, res, next) => {
     // 1) get user based on posted email

@@ -10,12 +10,12 @@ userRouter.post('/forgot-password', authController.forgotPassword);
 userRouter.patch('/reset-password/:resetToken', authController.resetPassword);
 
 // protect all the are now portect
-userRouter.use(authController.protectRoute);
+userRouter.use(authController.protectRoute); // all the route are now protectd
 userRouter.patch('/update-password', authController.upDatePassword);
 userRouter.patch('/update-account', userController.updateMe);
 userRouter.delete('/delete-account', userController.deleteMe);
 userRouter.get('/me', userController.getMe, userController.getUser);
-
+userRouter.get('/logout', authController.loggOut);
 // all of route restrict to admin
 userRouter.use(authController.restrictTo('admin'));
 userRouter

@@ -4,9 +4,9 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "nodemon ./Server/Server.js",
-		"start:prod": "NODE_ENV=production nodemon ./Server./Server.js",
-		"debug": "ndb ./Server/Server.js"
+		"start": "nodemon Server/Server.js",
+		"prod": "NODE_ENV=production nodemon Server/Server.js",
+		"debug": "ndb Server/Server.js"
 	},
 	"repository": {
 		"type": "git",
