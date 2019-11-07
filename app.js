@@ -57,7 +57,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // parse the body from request in req.body
 app.use(express.json({ limit: '10kb' }));
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // test middle were

@@ -7,7 +7,7 @@ const hideAlert = (type, meg) => {
 const showAlert = (type, meg) => {
     hideAlert();
     const markUp = `<div class="alert alert--${type}">${meg}</div>`;
-    document.body.insertAdjacentHTML('beforebegin', markUp);
+    document.body.insertAdjacentHTML('afterbegin', markUp);
     setTimeout(() => hideAlert(), 5000);
 };
 
