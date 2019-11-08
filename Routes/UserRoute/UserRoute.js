@@ -12,7 +12,7 @@ userRouter.patch('/reset-password/:resetToken', authController.resetPassword);
 // protect all the are now portect
 userRouter.use(authController.protectRoute); // all the route are now protectd
 userRouter.patch('/update-password', authController.upDatePassword);
-userRouter.patch('/update-account', userController.updateMe);
+userRouter.patch('/update-account', userController.uploadUserPhoto, userController.resizePhoto, userController.updateMyAccount);
 userRouter.delete('/delete-account', userController.deleteMe);
 userRouter.get('/me', userController.getMe, userController.getUser);
 userRouter.get('/logout', authController.loggOut);

@@ -3,20 +3,26 @@ const catchError = require('../../Utils/catchError');
 // Error Message when Development
 const sendErrorDev = (err, req, res) => {
     // start with (api) thats mean it is api error
-    if (req.originalUrl.startsWith('/api')) {
-        res.status(err.statusCode).json({
-            status: err.status,
-            message: err.message,
-            error: err,
-            errorStack: err.stack
-        });
-    } else {
-        // not start with (api) mean render error
-        res.status(err.statusCode).render('Error', {
-            title: 'someting went wrong..',
-            message: err.message
-        });
-    }
+     res.status(err.statusCode).json({
+         status: err.status,
+         message: err.message,
+         error: err,
+         errorStack: err.stack
+     });
+    // if (req.originalUrl.startsWith('/api')) {
+    //     res.status(err.statusCode).json({
+    //         status: err.status,
+    //         message: err.message,
+    //         error: err,
+    //         errorStack: err.stack
+    //     });
+    // } else {
+    //     // not start with (api) mean render error
+    //     res.status(err.statusCode).render('Error', {
+    //         title: 'someting went wrong..',
+    //         message: err.message
+    //     });
+    // }
 };
 
 // Error Message when Production

@@ -8,6 +8,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const chalk = require('chalk');
 
 const tourRouter = require('./Routes/TourRoute/TourRoute');
 const userRouter = require('./Routes/UserRoute/UserRoute');
@@ -63,10 +64,10 @@ app.use(cookieParser());
 // test middle were
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
-    console.log('cookie ==> ', req.cookies);
+    console.log(chalk.blueBright('cookies..'), req.cookies);
     next();
 });
-console.log(process.env.NODE_ENV);
+console.log(chalk.bgCyan(`${process.env.NODE_ENV}`));
 
 // Route Middle were
 app.use('/api/v1/tours', tourRouter);

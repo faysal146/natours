@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const chalk = require('chalk');
 // handle synce error
 process.on('uncaughtException', err => {
     // console.log(err.message, err.name);
-    console.log(err);
+    console.log(chalk.bgRed('error'), err);
     process.exit(1);
 });
 // config dot env file
@@ -12,10 +13,7 @@ dotenv.config();
 const app = require('../app');
 
 // replacing the mongoDB connection string with Data base Password
-const DB = process.env.DATABASE.replace(
-    '<PASSWORD>',
-    process.env.DATABASE_PASSWORD
-);
+const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 // connect the server to the mongoDB data base
 mongoose
     .connect(DB, {
@@ -24,9 +22,9 @@ mongoose
         useFindAndModify: false,
         useUnifiedTopology: true
     })
-    .then(() => console.log('mongoDB is now connected...'))
+    .then(() => console.log(chalk.italic.magenta('mongoDB is now connected...')))
     .catch(() => {
-        console.log('some how mongoDB is not able to connect...');
+        console.log(chalk.italic.bgRed('some how mongoDB is not able to connect...'));
         process.exit();
     });
 
@@ -34,13 +32,13 @@ const PORT = process.env.PORT || 3000;
 
 // start the server
 const server = app.listen(PORT, () => {
-    console.log('server is running.....');
+    console.log(chalk.greenBright('server is running.....'));
 });
 
 // if any unhandle promise
 process.on('unhandledRejection', err => {
     // console.log(err.message, err.name);
-    console.log(err.message);
-    console.log('Unhandled Rejection Shutting Down...');
+    console.log(chalk.bgRed('error'), err.message);
+    console.log(chalk.red('Unhandled Rejection Shutting Down...'));
     server.close(() => process.exit(1));
 });

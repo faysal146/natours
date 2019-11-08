@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const chalk = require('chalk');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
@@ -24,9 +25,9 @@ const sendResponse = ({ res, statusCode, token, user }) => {
     /*
         remove the password and active field from the response object
     */
-    console.log(user);
     user.password = undefined;
     user.active = undefined;
+    user.role = undefined;
 
     // send token via cookie
     res.cookie('token', token, options);
@@ -76,7 +77,7 @@ exports.protectRoute = catchError(async (req, res, next) => {
     // put user data in request
     req.user = currentUser;
     res.locals.user = currentUser;
-    console.log('current user ==> ', currentUser);
+    console.log(chalk.bgGreen.bold('current user  =>'), currentUser);
     // call the next middlewere
     next();
 });
@@ -150,7 +151,7 @@ exports.isLoggedin = async (req, res, next) => {
             put current user in locals object to get access user in the pug template
         */
             res.locals.user = currentUser;
-            console.log('current loggedin user ==> ', currentUser);
+            console.log(chalk.cyanBright(currentUser));
             next();
         } catch (err) {
             next();
