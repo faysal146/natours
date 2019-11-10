@@ -1,5 +1,6 @@
 const multer = require('multer');
 const jimp = require('jimp');
+const chalk = require('chalk');
 const User = require('../../Models/UserModel/UserModel');
 const catchError = require('../../Utils/catchError');
 const ErrorHandler = require('../../Utils/ErrorHandler');
@@ -45,16 +46,17 @@ const upload = multer({
 
 exports.resizePhoto = catchError(async (req, res, next) => {
     if (!req.file) return next();
-
+    // console.log(chalk.white('upload image info '), req.file);
     const [, ext] = req.file.mimetype.split('/');
 
     req.file.filename = `user-${req.user.id}-${Date.now()}.${ext}`;
 
     const img = await jimp.read(req.file.buffer);
-    img.resize(500, 500).write(`public/img/users/${req.file.filename}`);
+    img.resize(500, 500);
+    await img.writeAsync(`public/img/users/${req.file.filename}`);
     next();
 });
-
+// multer pruduce request.file
 exports.uploadUserPhoto = upload.single('photo');
 exports.getAllTheUsers = factoryHandler.getAll(User);
 exports.getUser = factoryHandler.getOne(User);

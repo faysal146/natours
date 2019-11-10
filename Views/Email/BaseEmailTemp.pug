@@ -1,11 +1,9 @@
-//- Email template adapted from https://github.com/leemunroe/responsive-html-email-template
-//- Converted from HTML using https://html2pug.now.sh/
-
 doctype html
 html
   head
     meta(name='viewport', content='width=device-width')
     meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
+    link(href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet") 
     title= subject
 
     style.
@@ -16,7 +14,7 @@ html
       }
       body {
         background-color: #f6f6f6;
-        font-family: sans-serif;
+        font-family: 'Open Sans', sans-serif;
         -webkit-font-smoothing: antialiased;
         font-size: 14px;
         line-height: 1.4;
@@ -24,6 +22,7 @@ html
         padding: 0;
         -ms-text-size-adjust: 100%;
         -webkit-text-size-adjust: 100%; 
+        font-weight: 400;
       }
       table {
         border-collapse: separate;
@@ -62,6 +61,15 @@ html
       .wrapper {
         box-sizing: border-box;
         padding: 20px; 
+      }
+      .header-block {
+        background: #444;
+        padding: 15px;
+      }
+      .header-block img {
+          width: 100px;
+          display:block;
+          margin: auto;
       }
       .content-block {
         padding-bottom: 10px;
@@ -276,39 +284,21 @@ html
             .content
               // START CENTERED WHITE CONTAINER
               table.main(role='presentation')
-
-                // START MAIN AREA
-                tbody
+                thead
                   tr
-                    td.wrapper
-                      table(role='presentation', border='0', cellpadding='0', cellspacing='0')
-                        tbody
-                          tr
-                            td
-                              // CONTENT
-                              p Hi NAME,
-                              p Welcome to Natours, we're glad to have you 🎉🙏
-                              p We're all a big familiy here, so make sure to upload your user photo so we get to know you a bit better!
-                              table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
-                                tbody
-                                  tr
-                                    td(align='left')
-                                      table(role='presentation', border='0', cellpadding='0', cellspacing='0')
-                                        tbody
-                                          tr
-                                            td
-                                              a(href='#', target='_blank') Upload user photo
-                              p If you need any help with booking your next tour, please don't hesitate to contact me!
-                              p - Jonas Schmedtmann, CEO
+                    th.header-block
+                      img(src=`http://localhost:3000/img/logo-green.png`)
+
+                    block main 
 
               // START FOOTER
               .footer
                 table(role='presentation', border='0', cellpadding='0', cellspacing='0')
                   tbody
                     tr
-                      td.content-block
+                      td.header-block
                         span.apple-link Natours Inc, 123 Nowhere Road, San Francisco CA 99999
                         br
                         |  Don't like these emails? 
                         a(href='#') Unsubscribe
-          //- td  
+          //- td  

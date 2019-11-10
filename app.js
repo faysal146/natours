@@ -67,7 +67,7 @@ app.use((req, res, next) => {
     console.log(chalk.blueBright('cookies..'), req.cookies);
     next();
 });
-console.log(chalk.bgCyan(`${process.env.NODE_ENV}`));
+console.log(chalk.rgb(255, 100, 50).bold(process.env.NODE_ENV));
 
 // Route Middle were
 app.use('/api/v1/tours', tourRouter);

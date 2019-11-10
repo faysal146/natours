@@ -7,7 +7,7 @@ const moment = require('moment');
 const User = require('../../Models/UserModel/UserModel');
 const catchError = require('../../Utils/catchError');
 const ErrorHandler = require('../../Utils/ErrorHandler');
-const sendMail = require('../../Utils/SendMailer');
+const Email = require('../../Utils/SendMailer');
 
 const authToken = id => {
     // sing in user bia jwt singin
@@ -104,7 +104,10 @@ exports.singUp = catchError(async (req, res, next) => {
     newUser.changePasswordAt = moment().toISOString();
     const addNewUser = await User.create(newUser);
     const token = authToken(addNewUser._id);
-    sendResponse({ res, statusCode: 201, token, user: addNewUser });
+    const url = `${req.protocol}://${req.get('host')}/account`;
+    console.log(url);
+    await new Email(addNewUser, url).sendWelcome();
+    sendResponse({ res, statusCode: 201, token, user: newUser });
 });
 exports.login = catchError(async (req, res, next) => {
     const { email, password } = req.body;

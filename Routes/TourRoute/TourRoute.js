@@ -31,7 +31,13 @@ tourRouter
 tourRouter
     .route('/:id')
     .get(tourController.getTour)
-    .patch(authController.protectRoute, authController.restrictTo('admin', 'lead-guide'), tourController.upDateTour)
+    .patch(
+        authController.protectRoute,
+        authController.restrictTo('admin', 'lead-guide'),
+        tourController.uploadTourImage,
+        tourController.resizeImages,
+        tourController.upDateTour
+    )
     .delete(authController.protectRoute, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour);
 
 module.exports = tourRouter;

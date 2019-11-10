@@ -77,7 +77,9 @@ exports.createOne = Model =>
     catchError(async (req, res, next) => {
         //     let newTour = await new Tour(req.body);
         //     newTour = await newTour.save();
-        const doc = await Model.create(req.body);
+        const createObj = req.body;
+        createObj.createAt = new Date();
+        const doc = await Model.create(createObj);
         res.status(201).json({
             status: 'success',
             data: {

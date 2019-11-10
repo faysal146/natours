@@ -8470,14 +8470,14 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-function upDateData(_x, _x2) {
+function upDateData(_x) {
   return _upDateData.apply(this, arguments);
 }
 
 function _upDateData() {
   _upDateData = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(name, email) {
+  regeneratorRuntime.mark(function _callee(formData) {
     var res;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -8485,10 +8485,7 @@ function _upDateData() {
           case 0:
             _context.prev = 0;
             _context.next = 3;
-            return _axios.default.patch('http://localhost:3000/api/v1/users/update-account', {
-              name: name,
-              email: email
-            });
+            return _axios.default.patch('http://localhost:3000/api/v1/users/update-account', formData);
 
           case 3:
             res = _context.sent;
@@ -8518,7 +8515,7 @@ function _upDateData() {
   return _upDateData.apply(this, arguments);
 }
 
-function upDatePassword(_x3, _x4, _x5) {
+function upDatePassword(_x2, _x3, _x4) {
   return _upDatePassword.apply(this, arguments);
 }
 
@@ -8541,6 +8538,7 @@ function _upDatePassword() {
 
           case 3:
             res = _context2.sent;
+            console.log(res);
 
             if (res.data.status === 'success') {
               window.location.reload();
@@ -8549,20 +8547,20 @@ function _upDatePassword() {
               (0, _alert.default)('error', 'something went wrong....');
             }
 
-            _context2.next = 10;
+            _context2.next = 11;
             break;
 
-          case 7:
-            _context2.prev = 7;
+          case 8:
+            _context2.prev = 8;
             _context2.t0 = _context2["catch"](0);
             (0, _alert.default)('error', _context2.t0.response.data.message);
 
-          case 10:
+          case 11:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[0, 7]]);
+    }, _callee2, null, [[0, 8]]);
   }));
   return _upDatePassword.apply(this, arguments);
 }
@@ -8845,6 +8843,7 @@ var loginForm = document.getElementById('login-form');
 var logoutBtn = document.getElementById('logout');
 var upDateForm = document.getElementById('form--info--update');
 var upDatePasswordForm = document.getElementById('update-password-form');
+var photo = document.querySelector('#photo');
 
 if (displayMap) {
   (0, _mapbox.default)(JSON.parse(displayMap.dataset.location));
@@ -8858,12 +8857,25 @@ if (logoutBtn) {
   logoutBtn.addEventListener('click', _user.logout);
 }
 
+if (photo) {
+  photo.addEventListener('change', function (e) {
+    var imgFile = e.target.files[0];
+    var uploadPhoto = document.getElementById('upload-photo');
+    uploadPhoto.src = window.URL.createObjectURL(imgFile);
+  });
+}
+
 if (upDateForm) {
   upDateForm.addEventListener('submit', function (e) {
     e.preventDefault();
     var name = document.querySelector('#form--info--update #name').value;
     var email = document.querySelector('#form--info--update #email').value;
-    (0, _updataUserData.upDateData)(name, email);
+    var photo = document.querySelector('#photo').files[0];
+    var form = new FormData();
+    form.append('email', email);
+    form.append('name', name);
+    form.append('photo', photo);
+    (0, _updataUserData.upDateData)(form);
   });
 }
 
@@ -8911,7 +8923,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51650" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50315" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

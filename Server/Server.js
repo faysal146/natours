@@ -22,7 +22,7 @@ mongoose
         useFindAndModify: false,
         useUnifiedTopology: true
     })
-    .then(() => console.log(chalk.italic.magenta('mongoDB is now connected...')))
+    .then(() => console.log(chalk.bgHex('#fff').hex('#000')('mongoDB is now connected...')))
     .catch(() => {
         console.log(chalk.italic.bgRed('some how mongoDB is not able to connect...'));
         process.exit();

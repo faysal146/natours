@@ -1,3 +1,6 @@
+const multer = require('multer');
+const jimp = require('jimp');
+//const chalk = require('chalk');
 const Tour = require('../../Models/TourModel/TourModel');
 const factoryHandler = require('../FactoryHandler/FactoryHandler');
 const catchError = require('../../Utils/catchError');
@@ -77,7 +80,47 @@ exports.getDistance = catchError(async (req, res, next) => {
         }
     });
 });
+const storage = multer.memoryStorage();
+const fileFilter = (req, file, callback) => {
+    if (file.mimetype.startsWith('image')) {
+        callback(null, true);
+    } else {
+        callback(new ErrorHandler('Not an image ! please upload only image file', 400), false);
+    }
+};
+const upload = multer({
+    storage,
+    fileFilter
+});
+exports.uploadTourImage = upload.fields([{ name: 'imageCover', maxCount: 1 }, { name: 'images', maxCount: 3 }]);
+exports.resizeImages = catchError(async (req, res, next) => {
+    const { files } = req;
+    // 1 check if there is image if not out of the function
+    // console.log(chalk.hex('#346944')('files'), files);
+    if (!files.imageCover || !files.images) return next();
+    const [coverImage] = files.imageCover;
+    // get the image ext
+    const [, ext] = coverImage.mimetype.split('/');
+    req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.${ext}`;
+    // 2 resize cover image
+    const resizeCover = await jimp.read(coverImage.buffer);
+    resizeCover.resize(2000, 1333).quality(90);
+    await resizeCover.writeAsync(`public/img/tours/${req.body.imageCover}`);
 
+    // 3 tours images
+    req.body.images = [];
+    await Promise.all(
+        files.images.map(async (file, index) => {
+            const fileName = `tour-${req.params.id}-${Date.now()}-${index + 1}.${ext}`;
+            const tourImage = await jimp.read(file.buffer);
+            tourImage.resize(2000, 1333).quality(90);
+            await tourImage.writeAsync(`public/img/tours/${fileName}`);
+            req.body.images.push(fileName);
+        })
+    );
+    //console.log(chalk.hex('#333567')('request body'), req.body);
+    next();
+});
 exports.getAllTours = factoryHandler.getAll(Tour);
 exports.getTour = factoryHandler.getOne(Tour, { path: 'reviews' });
 exports.createPost = factoryHandler.createOne(Tour);

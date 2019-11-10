@@ -1,11 +1,8 @@
 import axios from 'axios';
 import showAlert from './alert';
-async function upDateData(name, email) {
+async function upDateData(formData) {
     try {
-        const res = await axios.patch('http://localhost:3000/api/v1/users/update-account', {
-            name,
-            email
-        });
+        const res = await axios.patch('http://localhost:3000/api/v1/users/update-account', formData);
         if (res.data.status === 'success') {
             window.location.reload();
             showAlert('success', 'account info updating...');
@@ -24,7 +21,7 @@ async function upDatePassword(currentPassword, password, confirmPassword) {
             password,
             confirmPassword
         });
-        console.log(res)
+        console.log(res);
         if (res.data.status === 'success') {
             window.location.reload();
             showAlert('success', 'password is changed');
