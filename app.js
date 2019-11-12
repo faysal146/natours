@@ -14,6 +14,7 @@ const tourRouter = require('./Routes/TourRoute/TourRoute');
 const userRouter = require('./Routes/UserRoute/UserRoute');
 const reviewRouter = require('./Routes/ReviewRoute/ReviewRoute');
 const viewRouter = require('./Routes/ViewRoute/ViewRoute');
+const bookingsRoute = require('./Routes/BookingsRoute/BookingsRoute');
 const ErrorHandler = require('./Utils/ErrorHandler');
 const globalErrorControl = require('./Controls/ErrorController/ErrorController');
 
@@ -73,6 +74,7 @@ console.log(chalk.rgb(255, 100, 50).bold(process.env.NODE_ENV));
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingsRoute);
 app.use('/', viewRouter);
 // unhandle route
 

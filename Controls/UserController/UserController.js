@@ -1,6 +1,6 @@
 const multer = require('multer');
 const jimp = require('jimp');
-const chalk = require('chalk');
+//const chalk = require('chalk');
 const User = require('../../Models/UserModel/UserModel');
 const catchError = require('../../Utils/catchError');
 const ErrorHandler = require('../../Utils/ErrorHandler');

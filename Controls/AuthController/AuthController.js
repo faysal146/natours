@@ -22,12 +22,13 @@ const sendResponse = ({ res, statusCode, token, user }) => {
     };
     // in production secure is enable
     if (process.env.NODE_ENV === 'production') options.secure = true;
-    /*
-        remove the password and active field from the response object
-    */
+    // remove all the fields whice don't went to send
     user.password = undefined;
+    user.confirmPassword = undefined;
     user.active = undefined;
     user.role = undefined;
+    user.changePasswordAt = undefined;
+    user.passwordResetToken = undefined;
 
     // send token via cookie
     res.cookie('token', token, options);
@@ -183,19 +184,15 @@ exports.forgotPassword = catchError(async (req, res, next) => {
         return next(new ErrorHandler('No Account Found With this Email', 404)); // not found
     }
     // 2) generate random token
+    // (createPasswordResetToken) is an instance methood
     const resetToken = await user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
     // 3) send email to the user with random token
     const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`;
-    const message = `Forget Your Password ?. Please Click The Link to Set New Password ${resetUrl}`;
 
     try {
-        sendMail({
-            to: user.email,
-            subject: 'Your Account Reset Password Token (Valid for 10 min)',
-            message
-        });
+        await new Email(user, resetUrl).sendResetPassword();
         res.status(200).json({
             status: 'success',
             message: 'reset password token send to the email'
@@ -236,14 +233,14 @@ exports.resetPassword = catchError(async (req, res, next) => {
     user.confirmPassword = confirmPassword;
     user.passwordResetExpired = undefined;
     user.passwordResetToken = undefined;
-    await user.save();
+    const updatedUser = await user.save();
     /*
          5) update the password change at propety
          this future is apply as pre middle were in ===> userModel.js
     */
     // 6) send the new token to the user
     const token = await authToken(user._id);
-    sendResponse({ res, token });
+    sendResponse({ res, token, user: updatedUser });
 });
 exports.upDatePassword = catchError(async (req, res, next) => {
     /*

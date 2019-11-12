@@ -12,7 +12,14 @@ module.exports = class Email {
 
     mailTransport() {
         if (process.env.NODE_ENV === 'production') {
-            return 1;
+            console.log('send mail');
+            return nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.GMAIL_USERNAME,
+                    pass: process.env.GMAIL_PASS
+                }
+            });
         }
         return nodemailer.createTransport({
             host: process.env.MAIL_HOST,
@@ -24,23 +31,41 @@ module.exports = class Email {
         });
     }
 
-    async send(template, subject) {
-        const html = pug.renderFile(`${__dirname}/../Views/Email/${template}.pug`, {
-            firstName: this.firstName,
-            url: this.url,
-            subject
-        });
-        const mailOptions = {
-            from: this.form,
-            to: this.to,
-            subject,
-            html,
-            text: htmlToText.fromString(html)
-        };
-        await this.mailTransport().sendMail(mailOptions);
+    async send(template, subject, optional) {
+        try {
+            const html = pug.renderFile(`${__dirname}/../Views/Email/${template}.pug`, {
+                firstName: this.firstName,
+                url: this.url,
+                subject,
+                ...optional
+            });
+            const mailOptions = {
+                from: this.form,
+                to: this.to,
+                subject,
+                html,
+                text: htmlToText.fromString(html)
+            };
+            const some = await this.mailTransport().sendMail(mailOptions);
+            console.log(some);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     async sendWelcome() {
-        await this.send('welcome', 'Welcome To Natours Family');
+        try {
+            await this.send('welcome', 'Welcome To Natours Family');
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    async sendResetPassword() {
+        try {
+            await this.send('resetPassword', 'Reset Your Natours Password', { email: this.to });
+        } catch (err) {
+            console.log(err);
+        }
     }
 };

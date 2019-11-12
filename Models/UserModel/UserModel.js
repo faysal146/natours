@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const moment = require('moment');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -80,19 +81,13 @@ userSchema.pre('find', function(next) {
 });
 //instents methood
 // bycrypt password and compare
-userSchema.methods.correctPassword = async function(
-    candidatePassword,
-    userPassword
-) {
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
     return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 userSchema.methods.passwordChangeAt = async function(JWTTimeStamp) {
     if (this.changePasswordAt) {
-        const changeTimpStamp = parseInt(
-            this.changePasswordAt.getTime() / 1000,
-            10
-        );
+        const changeTimpStamp = parseInt(this.changePasswordAt.getTime() / 1000, 10);
         // 100 < 200 // true mean password change
         return JWTTimeStamp < changeTimpStamp;
     }
@@ -106,8 +101,8 @@ userSchema.methods.createPasswordResetToken = async function() {
         .createHash('sha256')
         .update(resetToken)
         .digest('hex');
-    this.passwordResetExpired = Date.now() + 10 * 60 * 1000;
-
+    // after 10 min password is expried
+    this.passwordResetExpired = moment.now() + moment.duration(10, 'minute').asMilliseconds();
     return resetToken;
 };
 
