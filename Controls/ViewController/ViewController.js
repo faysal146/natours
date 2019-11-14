@@ -1,5 +1,7 @@
+const chalk = require('chalk');
 const Tour = require('../../Models/TourModel/TourModel');
-const User = require('../../Models/UserModel/UserModel');
+//const User = require('../../Models/UserModel/UserModel');
+const Booking = require('../../Models/BookingModel/BookingModel');
 const catchError = require('../../Utils/catchError');
 const ErrorHandler = require('../../Utils/ErrorHandler');
 
@@ -33,6 +35,20 @@ const sendPage = (temp, res) => {
         title: 'Login'
     });
 };
+
+/*
+    find all tours that user was booked
+*/
+exports.getMyBookings = catchError(async (req, res, next) => {
+    const bookin = await Booking.find({ user: req.user._id });
+    const tourId = bookin.map(el => el.tour.id);
+    //console.log(chalk.hex('#344ac4')('all the tourIds'), tourId);
+    const tours = await Tour.find({ _id: { $in: tourId } });
+    res.status(200).render('OverView', {
+        title: 'Booked Tours',
+        tours
+    });
+});
 exports.getLoginFrom = (_, res) => sendPage('Login', res);
 exports.getSingupFrom = (_, res) => sendPage('Singup', res);
 exports.userAccount = (_, res) => sendPage('UserAccount', res);

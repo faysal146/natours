@@ -1,9 +1,10 @@
-/* eslint-disable */
 import '@babel/polyfill';
+
 import mapDispaly from './mapbox';
 import login from './login';
 import { logout } from './user';
 import { upDateData, upDatePassword } from './updataUserData';
+import getSessionData from './stripe';
 
 // dom
 const displayMap = document.getElementById('map');
@@ -11,7 +12,8 @@ const loginForm = document.getElementById('login-form');
 const logoutBtn = document.getElementById('logout');
 const upDateForm = document.getElementById('form--info--update');
 const upDatePasswordForm = document.getElementById('update-password-form');
-const photo = document.querySelector('#photo');
+const photo = document.getElementById('photo');
+const bookingButton = document.getElementById('booking-btn');
 
 if (displayMap) {
     mapDispaly(JSON.parse(displayMap.dataset.location));
@@ -60,5 +62,13 @@ if (upDatePasswordForm) {
             document.querySelector('#update-password-form #password').value = '';
             document.querySelector('#update-password-form #password-confirm').value = '';
         });
+    });
+}
+
+if (bookingButton) {
+    bookingButton.addEventListener('click', e => {
+        e.target.textContent = 'Proccessing...';
+        const { tourId } = e.target.dataset;
+        getSessionData(tourId);
     });
 }

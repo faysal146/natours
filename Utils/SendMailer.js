@@ -12,7 +12,6 @@ module.exports = class Email {
 
     mailTransport() {
         if (process.env.NODE_ENV === 'production') {
-            console.log('send mail');
             return nodemailer.createTransport({
                 service: 'gmail',
                 auth: {

@@ -39,6 +39,10 @@ const sendResponse = ({ res, statusCode, token, user }) => {
         data: { user }
     });
 };
+/*
+   1) protect all the route from unauth user
+   2) if user is loggedin then put user data in the req and also locals obj
+*/
 exports.protectRoute = catchError(async (req, res, next) => {
     let token;
     const { authorization } = req.headers;
@@ -128,6 +132,12 @@ exports.login = catchError(async (req, res, next) => {
     const token = authToken(user._id);
     sendResponse({ res, token, user });
 });
+/*
+    check user is loggin or not 
+    if user is loggedin then put user data in to the locals object to get access every pug template
+
+    if user is not loggedin call the next middlewere
+*/
 exports.isLoggedin = async (req, res, next) => {
     // 1) getting token from cookies and check it is valid or not
     if (req.cookies.token && validator.isJWT(req.cookies.token)) {

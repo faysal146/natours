@@ -3,12 +3,6 @@ const catchError = require('../../Utils/catchError');
 // Error Message when Development
 const sendErrorDev = (err, req, res) => {
     // start with (api) thats mean it is api error
-    res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-        error: err,
-        errorStack: err.stack
-    });
     if (req.originalUrl.startsWith('/api')) {
         res.status(err.statusCode).json({
             status: err.status,
