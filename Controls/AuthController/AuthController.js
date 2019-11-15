@@ -24,9 +24,7 @@ const sendResponse = ({ res, statusCode, token, user }) => {
     if (process.env.NODE_ENV === 'production') options.secure = true;
     // remove all the fields whice don't went to send
     user.password = undefined;
-    user.confirmPassword = undefined;
     user.active = undefined;
-    user.role = undefined;
     user.changePasswordAt = undefined;
     user.passwordResetToken = undefined;
 

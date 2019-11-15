@@ -221,6 +221,10 @@ body {
   outline: none;
   background-color: #2e864b;
 }
+.btn:disabled {
+  opacity: .7;
+  pointer-events: none;
+}
 
 .btn--white {
   background-color: #fff;
@@ -1321,4 +1325,23 @@ body {
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
   -webkit-transform: translateY(-2px);
   transform: translateY(-2px);
+}
+.loading {
+  width: 25px;
+  height: 25px;
+  margin-bottom: -5px;
+  margin-left: 10px;  
+  display: inline-block;
+  border-radius: 50%;
+  border: 3px solid;
+  border-color: #fff rgba(255, 255, 255, 0.452) rgba(255, 255, 255, 0.452) rgba(255, 255, 255, 0.452);
+  animation: loading .9s infinite cubic-bezier(0,.26,.98,.79);
+}
+@keyframes loading {
+  50% {
+     transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

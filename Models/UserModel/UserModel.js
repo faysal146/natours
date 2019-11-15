@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
         minlength: [3, 'name must atlest 3 characters'],
         validate: {
             validator() {
-                return !/\d/g.test(this.name);
+                return /^[a-zA-Z ]+$/.test(this.name);
             },
             message: 'name only contain alpha value'
         }

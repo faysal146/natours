@@ -1,2 +1,9 @@
 (sendgrid) to send mail
 (mailtrap) to test when development
+
+todo 
+
+
+add review slider
+hide book tour now block if user book this tour and prevent duplicate tour book
+add write review block if user is already book the tour

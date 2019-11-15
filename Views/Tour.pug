@@ -84,3 +84,6 @@ block content
                          button.btn.btn--green.span-all-rows#booking-btn(data-tour-id=`${tour.id}`) Book tour now!
                     - else 
                          a(href="/login").btn.btn--green.span-all-rows Login to Book tour
+block script
+     script(src="https://js.stripe.com/v3/")
+     script(src="/js/tour.js")

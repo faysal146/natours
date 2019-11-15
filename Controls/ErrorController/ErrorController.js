@@ -49,7 +49,7 @@ function sendErrorProd(err, req, res) {
         if (err.isOperational) {
             res.status(err.statusCode).render('Error', {
                 title: 'Error! Something went wrong',
-                message
+                message: err.message
             });
         } else {
             // 1) Log Error

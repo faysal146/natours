@@ -27,7 +27,7 @@ block content
                          //- form(method="POST" action="/updata-user" enctype="multipart/form-data" ).form.form-user-data#form--info--update
 
                          //- with API
-                         form.form.form-user-data#form--info--update
+                         form.form.form-user-data#update-info(novalidate)
                               .form__group
                                    label.form__label(for='name') Name
                                    input#name.form__input(type='text', value=user.name, required name="name")
@@ -43,7 +43,7 @@ block content
                     .line &nbsp;
                     .user-view__form-container
                          h2.heading-secondary.ma-bt-md Password change
-                         form.form.form-user-settings#update-password-form
+                         form.form.form-user-settings#update-password(novalidate)
                               .form__group
                                    label.form__label(for='password-current') Current password
                                    input#password-current.form__input(type='password', placeholder='••••••••', required, minlength='8')
@@ -55,3 +55,5 @@ block content
                                    input#password-confirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
                               .form__group.right
                                    button.btn.btn--small.btn--green(type="submit") Save password
+block script
+     script(src="/js/account.js")

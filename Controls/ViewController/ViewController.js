@@ -30,10 +30,17 @@ exports.getTour = catchError(async (req, res, next) => {
         tour
     });
 });
-const sendPage = (temp, res) => {
-    res.status(200).render(temp, {
-        title: 'Login'
-    });
+const sendPage = (temp, title, res) => {
+    res.status(200).render(temp, { title });
+};
+/*
+    if user is loggedin 
+    hide the route /login and /singup
+    redirect to home page
+*/
+exports.protectRouteFormAuthUser = (req, res, next) => {
+    if (res.locals.user) return res.redirect('/');
+    next();
 };
 
 /*
@@ -49,9 +56,9 @@ exports.getMyBookings = catchError(async (req, res, next) => {
         tours
     });
 });
-exports.getLoginFrom = (_, res) => sendPage('Login', res);
-exports.getSingupFrom = (_, res) => sendPage('Singup', res);
-exports.userAccount = (_, res) => sendPage('UserAccount', res);
+exports.getLoginFrom = (_, res) => sendPage('Login', 'Login' , res);
+exports.getSingupFrom = (_, res) => sendPage('Singup','Singup', res);
+exports.userAccount = (_, res) => sendPage('UserAccount','Account', res);
 
 // ===> woring direct from submit
 
