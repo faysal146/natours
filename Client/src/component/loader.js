@@ -1,5 +1,4 @@
 function showLoader(selelctor) {
-     console.log(selelctor)
      const el = document.querySelector(selelctor);
      el.disabled = true
      el.innerHTML += '<div class="loading"></div'

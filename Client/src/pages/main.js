@@ -11,7 +11,6 @@ function logoutUser () {
      axios
         .get('users/logout')
         .then(res => {
-            console.log(res)
             if (res.data.status === 'success') {
                 showAlert('success', 'Loggin out....');
                 window.location.assign('/');
@@ -21,7 +20,6 @@ function logoutUser () {
             }
         })
         .catch(err => {
-            console.log(err.response);
             showAlert('error', 'Error something went wrong...');
         });
 }
