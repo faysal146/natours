@@ -2,7 +2,8 @@ import '@babel/polyfill';
 import axios from '../ajax/axios';
 import showAlert from '../component/alert';
 import { showLoader, hideLoader } from '../component/loader'
-import validator from 'validator'
+import isEmail from 'validator/lib/isEmail'
+import isLength from 'validator/lib/isLength'
 
 const updateData = document.getElementById('update-info')
 const updatePassword = document.getElementById('update-password')
@@ -40,7 +41,7 @@ const updateUserData = e => {
           showAlert('error','Enter name')
      } else if (!/^[a-zA-Z ]+$/.test(name)) {
           showAlert('error','name only contain alpha characters')
-     } else if(!validator.isEmail(email)) {
+     } else if(!isEmail(email)) {
          showAlert('error','Please provide valid email address')
      } else {
           const form = new FormData();
@@ -65,7 +66,7 @@ const updateUserPassword = e => {
      
      if(currentPassword === '' || password === '' || confirmPassword === '') {
           showAlert('error','Enter Password')
-     } else if(!validator.isLength(password, {min: 8})) {
+     } else if(!isLength(password, {min: 8})) {
           showAlert('error','Password should be 8 characters')
      } else if (password !== confirmPassword) {
           showAlert('error','Password does not match')

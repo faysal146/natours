@@ -4,7 +4,7 @@ const chalk = require('chalk');
 // handle synce error
 process.on('uncaughtException', err => {
     // console.log(err.message, err.name);
-    console.log(chalk.bgRed('error'), err);
+    //console.log(chalk.bgRed('error'), err);
     process.exit(1);
 });
 // config dot env file

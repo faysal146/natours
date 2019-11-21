@@ -1,3 +1,3 @@
 mixin ratingStart(rating,index) 
-     svg(class=`reviews__star reviews__star--${rating >= index ? 'active' : 'inactive'}`)
+     svg(class=`reviews__star reviews__star--${rating >= index ? 'active' : 'inactive'}` data-id=`${index}`)
           use(xlink:href='/img/icons.svg#icon-star') 

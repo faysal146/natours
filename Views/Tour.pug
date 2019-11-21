@@ -3,6 +3,8 @@ include Mixin/_overviewFacts
 include Mixin/_pictureBox
 include Mixin/_ratingStar
 
+
+
 block append mapbox 
      script(src='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js')
      link(href='https://api.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet')
@@ -72,18 +74,25 @@ block content
                                    +ratingStart(review.rating,i)                                
 
      section.section-cta
-          .cta
-               .cta__img.cta__img--logo
-                    img(src='/img/logo-white.png', alt='Natours logo')
-               img.cta__img.cta__img--1(src=`/img/tours/${tour.images[0]}`, alt='Tour Picture')
-               img.cta__img.cta__img--2(src=`/img/tours/${tour.images[1]}`, alt='Tour Picture')
-               .cta__content
-                    h2.heading-secondary What are you waiting for?
-                    p.cta__text #{tour.duration} days. 1 adventure. Infinite memories. Make it yours today!
-                    - if (user) 
-                         button.btn.btn--green.span-all-rows#booking-btn(data-tour-id=`${tour.id}`) Book tour now!
-                    - else 
-                         a(href="/login").btn.btn--green.span-all-rows Login to Book tour
+               .cta
+                    .cta__img.cta__img--logo
+                         img(src='/img/logo-white.png', alt='Natours logo')
+                    img.cta__img.cta__img--1(src=`/img/tours/${tour.images[0]}`, alt='Tour Picture')
+                    img.cta__img.cta__img--2(src=`/img/tours/${tour.images[1]}`, alt='Tour Picture')
+                    .cta__content
+                         - if(tour.isTourBooked)
+                              h2.heading-secondary How has your overall experience ?
+                              p.cta__text It will help us to serve better
+                              .cta__rating.span-all-rows
+                                   -  for (let i = 1; i < 6; i++)
+                                       +ratingStart(0,i)
+                         - else 
+                              h2.heading-secondary What are you waiting for?
+                              p.cta__text #{tour.duration} days. 1 adventure. Infinite memories. Make it yours today!
+                              - if (user) 
+                                   button.btn.btn--green.span-all-rows#booking-btn(data-tour-id=`${tour.id}`) Book tour now!
+                              - else 
+                                   a(href="/login").btn.btn--green.span-all-rows Login to Book tour
 block script
      script(src="https://js.stripe.com/v3/")
      script(src="/js/tour.js")

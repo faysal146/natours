@@ -6643,488 +6643,7 @@ function assertString(input) {
 
 module.exports = exports.default;
 module.exports.default = exports.default;
-},{}],"../../node_modules/validator/lib/util/merge.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = merge;
-
-function merge() {
-  var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var defaults = arguments.length > 1 ? arguments[1] : undefined;
-
-  for (var key in defaults) {
-    if (typeof obj[key] === 'undefined') {
-      obj[key] = defaults[key];
-    }
-  }
-
-  return obj;
-}
-
-module.exports = exports.default;
-module.exports.default = exports.default;
-},{}],"../../node_modules/validator/lib/isByteLength.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = isByteLength;
-
-var _assertString = _interopRequireDefault(require("./util/assertString"));
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    default: obj
-  };
-}
-
-function _typeof(obj) {
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-/* eslint-disable prefer-rest-params */
-
-
-function isByteLength(str, options) {
-  (0, _assertString.default)(str);
-  var min;
-  var max;
-
-  if (_typeof(options) === 'object') {
-    min = options.min || 0;
-    max = options.max;
-  } else {
-    // backwards compatibility: isByteLength(str, min [, max])
-    min = arguments[1];
-    max = arguments[2];
-  }
-
-  var len = encodeURI(str).split(/%..|./).length - 1;
-  return len >= min && (typeof max === 'undefined' || len <= max);
-}
-
-module.exports = exports.default;
-module.exports.default = exports.default;
-},{"./util/assertString":"../../node_modules/validator/lib/util/assertString.js"}],"../../node_modules/validator/lib/isFQDN.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = isFQDN;
-
-var _assertString = _interopRequireDefault(require("./util/assertString"));
-
-var _merge = _interopRequireDefault(require("./util/merge"));
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    default: obj
-  };
-}
-
-var default_fqdn_options = {
-  require_tld: true,
-  allow_underscores: false,
-  allow_trailing_dot: false
-};
-
-function isFQDN(str, options) {
-  (0, _assertString.default)(str);
-  options = (0, _merge.default)(options, default_fqdn_options);
-  /* Remove the optional trailing dot before checking validity */
-
-  if (options.allow_trailing_dot && str[str.length - 1] === '.') {
-    str = str.substring(0, str.length - 1);
-  }
-
-  var parts = str.split('.');
-
-  for (var i = 0; i < parts.length; i++) {
-    if (parts[i].length > 63) {
-      return false;
-    }
-  }
-
-  if (options.require_tld) {
-    var tld = parts.pop();
-
-    if (!parts.length || !/^([a-z\u00a1-\uffff]{2,}|xn[a-z0-9-]{2,})$/i.test(tld)) {
-      return false;
-    } // disallow spaces
-
-
-    if (/[\s\u2002-\u200B\u202F\u205F\u3000\uFEFF\uDB40\uDC20]/.test(tld)) {
-      return false;
-    }
-  }
-
-  for (var part, _i = 0; _i < parts.length; _i++) {
-    part = parts[_i];
-
-    if (options.allow_underscores) {
-      part = part.replace(/_/g, '');
-    }
-
-    if (!/^[a-z\u00a1-\uffff0-9-]+$/i.test(part)) {
-      return false;
-    } // disallow full-width chars
-
-
-    if (/[\uff01-\uff5e]/.test(part)) {
-      return false;
-    }
-
-    if (part[0] === '-' || part[part.length - 1] === '-') {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-module.exports = exports.default;
-module.exports.default = exports.default;
-},{"./util/assertString":"../../node_modules/validator/lib/util/assertString.js","./util/merge":"../../node_modules/validator/lib/util/merge.js"}],"../../node_modules/validator/lib/isIP.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = isIP;
-
-var _assertString = _interopRequireDefault(require("./util/assertString"));
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    default: obj
-  };
-}
-
-var ipv4Maybe = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-var ipv6Block = /^[0-9A-F]{1,4}$/i;
-
-function isIP(str) {
-  var version = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-  (0, _assertString.default)(str);
-  version = String(version);
-
-  if (!version) {
-    return isIP(str, 4) || isIP(str, 6);
-  } else if (version === '4') {
-    if (!ipv4Maybe.test(str)) {
-      return false;
-    }
-
-    var parts = str.split('.').sort(function (a, b) {
-      return a - b;
-    });
-    return parts[3] <= 255;
-  } else if (version === '6') {
-    var blocks = str.split(':');
-    var foundOmissionBlock = false; // marker to indicate ::
-    // At least some OS accept the last 32 bits of an IPv6 address
-    // (i.e. 2 of the blocks) in IPv4 notation, and RFC 3493 says
-    // that '::ffff:a.b.c.d' is valid for IPv4-mapped IPv6 addresses,
-    // and '::a.b.c.d' is deprecated, but also valid.
-
-    var foundIPv4TransitionBlock = isIP(blocks[blocks.length - 1], 4);
-    var expectedNumberOfBlocks = foundIPv4TransitionBlock ? 7 : 8;
-
-    if (blocks.length > expectedNumberOfBlocks) {
-      return false;
-    } // initial or final ::
-
-
-    if (str === '::') {
-      return true;
-    } else if (str.substr(0, 2) === '::') {
-      blocks.shift();
-      blocks.shift();
-      foundOmissionBlock = true;
-    } else if (str.substr(str.length - 2) === '::') {
-      blocks.pop();
-      blocks.pop();
-      foundOmissionBlock = true;
-    }
-
-    for (var i = 0; i < blocks.length; ++i) {
-      // test for a :: which can not be at the string start/end
-      // since those cases have been handled above
-      if (blocks[i] === '' && i > 0 && i < blocks.length - 1) {
-        if (foundOmissionBlock) {
-          return false; // multiple :: in address
-        }
-
-        foundOmissionBlock = true;
-      } else if (foundIPv4TransitionBlock && i === blocks.length - 1) {// it has been checked before that the last
-        // block is a valid IPv4 address
-      } else if (!ipv6Block.test(blocks[i])) {
-        return false;
-      }
-    }
-
-    if (foundOmissionBlock) {
-      return blocks.length >= 1;
-    }
-
-    return blocks.length === expectedNumberOfBlocks;
-  }
-
-  return false;
-}
-
-module.exports = exports.default;
-module.exports.default = exports.default;
-},{"./util/assertString":"../../node_modules/validator/lib/util/assertString.js"}],"../../node_modules/validator/lib/isEmail.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = isEmail;
-
-var _assertString = _interopRequireDefault(require("./util/assertString"));
-
-var _merge = _interopRequireDefault(require("./util/merge"));
-
-var _isByteLength = _interopRequireDefault(require("./isByteLength"));
-
-var _isFQDN = _interopRequireDefault(require("./isFQDN"));
-
-var _isIP = _interopRequireDefault(require("./isIP"));
-
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    default: obj
-  };
-}
-
-function _slicedToArray(arr, i) {
-  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
-}
-
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance");
-}
-
-function _iterableToArrayLimit(arr, i) {
-  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-    return;
-  }
-
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-var default_email_options = {
-  allow_display_name: false,
-  require_display_name: false,
-  allow_utf8_local_part: true,
-  require_tld: true
-};
-/* eslint-disable max-len */
-
-/* eslint-disable no-control-regex */
-
-var splitNameAddress = /^([^\x00-\x1F\x7F-\x9F\cX]+)<(.+)>$/i;
-var emailUserPart = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~]+$/i;
-var gmailUserPart = /^[a-z\d]+$/;
-var quotedEmailUser = /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f]))*$/i;
-var emailUserUtf8Part = /^[a-z\d!#\$%&'\*\+\-\/=\?\^_`{\|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+$/i;
-var quotedEmailUserUtf8 = /^([\s\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|(\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*$/i;
-var defaultMaxEmailLength = 254;
-/* eslint-enable max-len */
-
-/* eslint-enable no-control-regex */
-
-/**
- * Validate display name according to the RFC2822: https://tools.ietf.org/html/rfc2822#appendix-A.1.2
- * @param {String} display_name
- */
-
-function validateDisplayName(display_name) {
-  var trim_quotes = display_name.match(/^"(.+)"$/i);
-  var display_name_without_quotes = trim_quotes ? trim_quotes[1] : display_name; // display name with only spaces is not valid
-
-  if (!display_name_without_quotes.trim()) {
-    return false;
-  } // check whether display name contains illegal character
-
-
-  var contains_illegal = /[\.";<>]/.test(display_name_without_quotes);
-
-  if (contains_illegal) {
-    // if contains illegal characters,
-    // must to be enclosed in double-quotes, otherwise it's not a valid display name
-    if (!trim_quotes) {
-      return false;
-    } // the quotes in display name must start with character symbol \
-
-
-    var all_start_with_back_slash = display_name_without_quotes.split('"').length === display_name_without_quotes.split('\\"').length;
-
-    if (!all_start_with_back_slash) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function isEmail(str, options) {
-  (0, _assertString.default)(str);
-  options = (0, _merge.default)(options, default_email_options);
-
-  if (options.require_display_name || options.allow_display_name) {
-    var display_email = str.match(splitNameAddress);
-
-    if (display_email) {
-      var display_name;
-
-      var _display_email = _slicedToArray(display_email, 3);
-
-      display_name = _display_email[1];
-      str = _display_email[2]; // sometimes need to trim the last space to get the display name
-      // because there may be a space between display name and email address
-      // eg. myname <address@gmail.com>
-      // the display name is `myname` instead of `myname `, so need to trim the last space
-
-      if (display_name.endsWith(' ')) {
-        display_name = display_name.substr(0, display_name.length - 1);
-      }
-
-      if (!validateDisplayName(display_name)) {
-        return false;
-      }
-    } else if (options.require_display_name) {
-      return false;
-    }
-  }
-
-  if (!options.ignore_max_length && str.length > defaultMaxEmailLength) {
-    return false;
-  }
-
-  var parts = str.split('@');
-  var domain = parts.pop();
-  var user = parts.join('@');
-  var lower_domain = domain.toLowerCase();
-
-  if (options.domain_specific_validation && (lower_domain === 'gmail.com' || lower_domain === 'googlemail.com')) {
-    /*
-      Previously we removed dots for gmail addresses before validating.
-      This was removed because it allows `multiple..dots@gmail.com`
-      to be reported as valid, but it is not.
-      Gmail only normalizes single dots, removing them from here is pointless,
-      should be done in normalizeEmail
-    */
-    user = user.toLowerCase(); // Removing sub-address from username before gmail validation
-
-    var username = user.split('+')[0]; // Dots are not included in gmail length restriction
-
-    if (!(0, _isByteLength.default)(username.replace('.', ''), {
-      min: 6,
-      max: 30
-    })) {
-      return false;
-    }
-
-    var _user_parts = username.split('.');
-
-    for (var i = 0; i < _user_parts.length; i++) {
-      if (!gmailUserPart.test(_user_parts[i])) {
-        return false;
-      }
-    }
-  }
-
-  if (!(0, _isByteLength.default)(user, {
-    max: 64
-  }) || !(0, _isByteLength.default)(domain, {
-    max: 254
-  })) {
-    return false;
-  }
-
-  if (!(0, _isFQDN.default)(domain, {
-    require_tld: options.require_tld
-  })) {
-    if (!options.allow_ip_domain) {
-      return false;
-    }
-
-    if (!(0, _isIP.default)(domain)) {
-      if (!domain.startsWith('[') || !domain.endsWith(']')) {
-        return false;
-      }
-
-      var noBracketdomain = domain.substr(1, domain.length - 2);
-
-      if (noBracketdomain.length === 0 || !(0, _isIP.default)(noBracketdomain)) {
-        return false;
-      }
-    }
-  }
-
-  if (user[0] === '"') {
-    user = user.slice(1, user.length - 1);
-    return options.allow_utf8_local_part ? quotedEmailUserUtf8.test(user) : quotedEmailUser.test(user);
-  }
-
-  var pattern = options.allow_utf8_local_part ? emailUserUtf8Part : emailUserPart;
-  var user_parts = user.split('.');
-
-  for (var _i2 = 0; _i2 < user_parts.length; _i2++) {
-    if (!pattern.test(user_parts[_i2])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-module.exports = exports.default;
-module.exports.default = exports.default;
-},{"./util/assertString":"../../node_modules/validator/lib/util/assertString.js","./util/merge":"../../node_modules/validator/lib/util/merge.js","./isByteLength":"../../node_modules/validator/lib/isByteLength.js","./isFQDN":"../../node_modules/validator/lib/isFQDN.js","./isIP":"../../node_modules/validator/lib/isIP.js"}],"../../node_modules/validator/lib/isLength.js":[function(require,module,exports) {
+},{}],"../../node_modules/validator/lib/isLength.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7206,6 +6725,26 @@ var showAlert = function showAlert() {
 
 var _default = showAlert;
 exports.default = _default;
+},{}],"../component/loader.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.showLoader = showLoader;
+exports.hideLoader = hideLoader;
+
+function showLoader(selelctor) {
+  var el = document.querySelector(selelctor);
+  el.disabled = true;
+  el.innerHTML += '<div class="loading"></div';
+}
+
+function hideLoader() {
+  var el = document.querySelector('.loading');
+  el.parentElement.disabled = false;
+  el.parentElement.removeChild(el);
+}
 },{}],"../../node_modules/axios/lib/helpers/bind.js":[function(require,module,exports) {
 'use strict';
 
@@ -8941,70 +8480,7 @@ var instance = _axios.default.create({
 
 var _default = instance;
 exports.default = _default;
-},{"axios":"../../node_modules/axios/index.js"}],"../component/loader.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.showLoader = showLoader;
-exports.hideLoader = hideLoader;
-
-function showLoader(selelctor) {
-  var el = document.querySelector(selelctor);
-  el.disabled = true;
-  el.innerHTML += '<div class="loading"></div';
-}
-
-function hideLoader() {
-  var el = document.querySelector('.loading');
-  el.parentElement.disabled = false;
-  el.parentElement.removeChild(el);
-}
-},{}],"../ajax/ajax.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _axios = _interopRequireDefault(require("./axios"));
-
-var _alert = _interopRequireDefault(require("../component/alert"));
-
-var _loader = require("../component/loader");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function ajax(_ref) {
-  var path = _ref.path,
-      userData = _ref.userData,
-      message = _ref.message;
-  (0, _loader.showLoader)('.form button');
-
-  _axios.default.post(path, userData).then(function (res) {
-    if (res.data.status === 'success') {
-      (0, _alert.default)('success', message);
-
-      if (!path.includes('forgot-password')) {
-        window.location.assign('/');
-      }
-
-      (0, _loader.hideLoader)();
-    } else {
-      (0, _alert.default)('error', 'something went wrong');
-      (0, _loader.hideLoader)();
-    }
-  }).catch(function (err) {
-    (0, _loader.hideLoader)();
-    (0, _alert.default)('error', err.response.data.message);
-  });
-}
-
-var _default = ajax;
-exports.default = _default;
-},{"./axios":"../ajax/axios.js","../component/alert":"../component/alert.js","../component/loader":"../component/loader.js"}],"login.js":[function(require,module,exports) {
+},{"axios":"../../node_modules/axios/index.js"}],"resetPassword.js":[function(require,module,exports) {
 "use strict";
 
 require("core-js/modules/es6.array.copy-within");
@@ -9267,41 +8743,66 @@ require("core-js/modules/web.dom.iterable");
 
 require("regenerator-runtime/runtime");
 
-var _isEmail = _interopRequireDefault(require("validator/lib/isEmail"));
-
 var _isLength = _interopRequireDefault(require("validator/lib/isLength"));
 
 var _alert = _interopRequireDefault(require("../component/alert"));
 
-var _ajax = _interopRequireDefault(require("../ajax/ajax"));
+var _loader = require("../component/loader");
+
+var _axios = _interopRequireDefault(require("../ajax/axios"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var loginForm = document.getElementById('login-form');
-loginForm.addEventListener('submit', function (e) {
-  e.preventDefault();
-  var email = document.getElementById('email').value;
-  var password = document.getElementById('password').value;
+var resetPassword = document.getElementById('resetPassword-form');
 
-  if (!(0, _isEmail.default)(email)) {
-    (0, _alert.default)('error', 'Please provide valid email address');
-  } else if (!(0, _isLength.default)(password, {
+var updataAjax = function updataAjax(_ref) {
+  var path = _ref.path,
+      formData = _ref.formData,
+      message = _ref.message;
+  (0, _loader.showLoader)(".form button");
+  return _axios.default.patch(path, formData).then(function (res) {
+    if (res.data.status === 'success') {
+      window.location.assign('/');
+      (0, _alert.default)('success', message);
+      (0, _loader.hideLoader)();
+    } else {
+      (0, _alert.default)('error', 'something went wrong....');
+      (0, _loader.hideLoader)();
+    }
+  }).catch(function (err) {
+    (0, _loader.hideLoader)();
+    (0, _alert.default)('error', err.response.data.message);
+  });
+};
+
+resetPassword.addEventListener('submit', function (e) {
+  e.preventDefault();
+  var password = document.getElementById('password').value;
+  var confirmPassword = document.getElementById('confirm-password').value;
+
+  if (!(0, _isLength.default)(password, {
     min: 8
   })) {
     (0, _alert.default)('error', 'Password should be 8 characters');
+  } else if (password !== confirmPassword) {
+    (0, _alert.default)('error', 'Password does not match');
   } else {
+    var urlPar = new URLSearchParams(window.location.search);
+    var token = urlPar.get('token');
+    if (!token) return (0, _alert.default)('error', 'Invalid Token');
     var options = {
-      path: 'users/login',
-      userData: {
-        email: email,
-        password: password
+      path: "users/reset-password/".concat(token),
+      formData: {
+        password: password,
+        confirmPassword: confirmPassword
       },
-      message: 'Login to your account'
+      message: 'Your password reset successfully'
     };
-    (0, _ajax.default)(options);
+    console.log(options);
+    updataAjax(options);
   }
 });
-},{"core-js/modules/es6.array.copy-within":"../../node_modules/core-js/modules/es6.array.copy-within.js","core-js/modules/es6.array.fill":"../../node_modules/core-js/modules/es6.array.fill.js","core-js/modules/es6.array.find":"../../node_modules/core-js/modules/es6.array.find.js","core-js/modules/es6.array.find-index":"../../node_modules/core-js/modules/es6.array.find-index.js","core-js/modules/es7.array.flat-map":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.from":"../../node_modules/core-js/modules/es6.array.from.js","core-js/modules/es7.array.includes":"../../node_modules/core-js/modules/es7.array.includes.js","core-js/modules/es6.array.iterator":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.of":"../../node_modules/core-js/modules/es6.array.of.js","core-js/modules/es6.array.sort":"../../node_modules/core-js/modules/es6.array.sort.js","core-js/modules/es6.array.species":"../../node_modules/core-js/modules/es6.array.species.js","core-js/modules/es6.date.to-json":"../../node_modules/core-js/modules/es6.date.to-json.js","core-js/modules/es6.date.to-primitive":"../../node_modules/core-js/modules/es6.date.to-primitive.js","core-js/modules/es6.function.has-instance":"../../node_modules/core-js/modules/es6.function.has-instance.js","core-js/modules/es6.function.name":"../../node_modules/core-js/modules/es6.function.name.js","core-js/modules/es6.map":"../../node_modules/core-js/modules/es6.map.js","core-js/modules/es6.math.acosh":"../../node_modules/core-js/modules/es6.math.acosh.js","core-js/modules/es6.math.asinh":"../../node_modules/core-js/modules/es6.math.asinh.js","core-js/modules/es6.math.atanh":"../../node_modules/core-js/modules/es6.math.atanh.js","core-js/modules/es6.math.cbrt":"../../node_modules/core-js/modules/es6.math.cbrt.js","core-js/modules/es6.math.clz32":"../../node_modules/core-js/modules/es6.math.clz32.js","core-js/modules/es6.math.cosh":"../../node_modules/core-js/modules/es6.math.cosh.js","core-js/modules/es6.math.expm1":"../../node_modules/core-js/modules/es6.math.expm1.js","core-js/modules/es6.math.fround":"../../node_modules/core-js/modules/es6.math.fround.js","core-js/modules/es6.math.hypot":"../../node_modules/core-js/modules/es6.math.hypot.js","core-js/modules/es6.math.imul":"../../node_modules/core-js/modules/es6.math.imul.js","core-js/modules/es6.math.log1p":"../../node_modules/core-js/modules/es6.math.log1p.js","core-js/modules/es6.math.log10":"../../node_modules/core-js/modules/es6.math.log10.js","core-js/modules/es6.math.log2":"../../node_modules/core-js/modules/es6.math.log2.js","core-js/modules/es6.math.sign":"../../node_modules/core-js/modules/es6.math.sign.js","core-js/modules/es6.math.sinh":"../../node_modules/core-js/modules/es6.math.sinh.js","core-js/modules/es6.math.tanh":"../../node_modules/core-js/modules/es6.math.tanh.js","core-js/modules/es6.math.trunc":"../../node_modules/core-js/modules/es6.math.trunc.js","core-js/modules/es6.number.constructor":"../../node_modules/core-js/modules/es6.number.constructor.js","core-js/modules/es6.number.epsilon":"../../node_modules/core-js/modules/es6.number.epsilon.js","core-js/modules/es6.number.is-finite":"../../node_modules/core-js/modules/es6.number.is-finite.js","core-js/modules/es6.number.is-integer":"../../node_modules/core-js/modules/es6.number.is-integer.js","core-js/modules/es6.number.is-nan":"../../node_modules/core-js/modules/es6.number.is-nan.js","core-js/modules/es6.number.is-safe-integer":"../../node_modules/core-js/modules/es6.number.is-safe-integer.js","core-js/modules/es6.number.max-safe-integer":"../../node_modules/core-js/modules/es6.number.max-safe-integer.js","core-js/modules/es6.number.min-safe-integer":"../../node_modules/core-js/modules/es6.number.min-safe-integer.js","core-js/modules/es6.number.parse-float":"../../node_modules/core-js/modules/es6.number.parse-float.js","core-js/modules/es6.number.parse-int":"../../node_modules/core-js/modules/es6.number.parse-int.js","core-js/modules/es6.object.assign":"../../node_modules/core-js/modules/es6.object.assign.js","core-js/modules/es7.object.define-getter":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.entries":"../../node_modules/core-js/modules/es7.object.entries.js","core-js/modules/es6.object.freeze":"../../node_modules/core-js/modules/es6.object.freeze.js","core-js/modules/es6.object.get-own-property-descriptor":"../../node_modules/core-js/modules/es6.object.get-own-property-descriptor.js","core-js/modules/es7.object.get-own-property-descriptors":"../../node_modules/core-js/modules/es7.object.get-own-property-descriptors.js","core-js/modules/es6.object.get-own-property-names":"../../node_modules/core-js/modules/es6.object.get-own-property-names.js","core-js/modules/es6.object.get-prototype-of":"../../node_modules/core-js/modules/es6.object.get-prototype-of.js","core-js/modules/es7.object.lookup-getter":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.prevent-extensions":"../../node_modules/core-js/modules/es6.object.prevent-extensions.js","core-js/modules/es6.object.to-string":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es6.object.is":"../../node_modules/core-js/modules/es6.object.is.js","core-js/modules/es6.object.is-frozen":"../../node_modules/core-js/modules/es6.object.is-frozen.js","core-js/modules/es6.object.is-sealed":"../../node_modules/core-js/modules/es6.object.is-sealed.js","core-js/modules/es6.object.is-extensible":"../../node_modules/core-js/modules/es6.object.is-extensible.js","core-js/modules/es6.object.keys":"../../node_modules/core-js/modules/es6.object.keys.js","core-js/modules/es6.object.seal":"../../node_modules/core-js/modules/es6.object.seal.js","core-js/modules/es6.object.set-prototype-of":"../../node_modules/core-js/modules/es6.object.set-prototype-of.js","core-js/modules/es7.object.values":"../../node_modules/core-js/modules/es7.object.values.js","core-js/modules/es6.promise":"../../node_modules/core-js/modules/es6.promise.js","core-js/modules/es7.promise.finally":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.reflect.apply":"../../node_modules/core-js/modules/es6.reflect.apply.js","core-js/modules/es6.reflect.construct":"../../node_modules/core-js/modules/es6.reflect.construct.js","core-js/modules/es6.reflect.define-property":"../../node_modules/core-js/modules/es6.reflect.define-property.js","core-js/modules/es6.reflect.delete-property":"../../node_modules/core-js/modules/es6.reflect.delete-property.js","core-js/modules/es6.reflect.get":"../../node_modules/core-js/modules/es6.reflect.get.js","core-js/modules/es6.reflect.get-own-property-descriptor":"../../node_modules/core-js/modules/es6.reflect.get-own-property-descriptor.js","core-js/modules/es6.reflect.get-prototype-of":"../../node_modules/core-js/modules/es6.reflect.get-prototype-of.js","core-js/modules/es6.reflect.has":"../../node_modules/core-js/modules/es6.reflect.has.js","core-js/modules/es6.reflect.is-extensible":"../../node_modules/core-js/modules/es6.reflect.is-extensible.js","core-js/modules/es6.reflect.own-keys":"../../node_modules/core-js/modules/es6.reflect.own-keys.js","core-js/modules/es6.reflect.prevent-extensions":"../../node_modules/core-js/modules/es6.reflect.prevent-extensions.js","core-js/modules/es6.reflect.set":"../../node_modules/core-js/modules/es6.reflect.set.js","core-js/modules/es6.reflect.set-prototype-of":"../../node_modules/core-js/modules/es6.reflect.set-prototype-of.js","core-js/modules/es6.regexp.constructor":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.set":"../../node_modules/core-js/modules/es6.set.js","core-js/modules/es6.symbol":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es6.string.anchor":"../../node_modules/core-js/modules/es6.string.anchor.js","core-js/modules/es6.string.big":"../../node_modules/core-js/modules/es6.string.big.js","core-js/modules/es6.string.blink":"../../node_modules/core-js/modules/es6.string.blink.js","core-js/modules/es6.string.bold":"../../node_modules/core-js/modules/es6.string.bold.js","core-js/modules/es6.string.code-point-at":"../../node_modules/core-js/modules/es6.string.code-point-at.js","core-js/modules/es6.string.ends-with":"../../node_modules/core-js/modules/es6.string.ends-with.js","core-js/modules/es6.string.fixed":"../../node_modules/core-js/modules/es6.string.fixed.js","core-js/modules/es6.string.fontcolor":"../../node_modules/core-js/modules/es6.string.fontcolor.js","core-js/modules/es6.string.fontsize":"../../node_modules/core-js/modules/es6.string.fontsize.js","core-js/modules/es6.string.from-code-point":"../../node_modules/core-js/modules/es6.string.from-code-point.js","core-js/modules/es6.string.includes":"../../node_modules/core-js/modules/es6.string.includes.js","core-js/modules/es6.string.italics":"../../node_modules/core-js/modules/es6.string.italics.js","core-js/modules/es6.string.iterator":"../../node_modules/core-js/modules/es6.string.iterator.js","core-js/modules/es6.string.link":"../../node_modules/core-js/modules/es6.string.link.js","core-js/modules/es7.string.pad-start":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es6.string.raw":"../../node_modules/core-js/modules/es6.string.raw.js","core-js/modules/es6.string.repeat":"../../node_modules/core-js/modules/es6.string.repeat.js","core-js/modules/es6.string.small":"../../node_modules/core-js/modules/es6.string.small.js","core-js/modules/es6.string.starts-with":"../../node_modules/core-js/modules/es6.string.starts-with.js","core-js/modules/es6.string.strike":"../../node_modules/core-js/modules/es6.string.strike.js","core-js/modules/es6.string.sub":"../../node_modules/core-js/modules/es6.string.sub.js","core-js/modules/es6.string.sup":"../../node_modules/core-js/modules/es6.string.sup.js","core-js/modules/es7.string.trim-left":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/es6.typed.array-buffer":"../../node_modules/core-js/modules/es6.typed.array-buffer.js","core-js/modules/es6.typed.int8-array":"../../node_modules/core-js/modules/es6.typed.int8-array.js","core-js/modules/es6.typed.uint8-array":"../../node_modules/core-js/modules/es6.typed.uint8-array.js","core-js/modules/es6.typed.uint8-clamped-array":"../../node_modules/core-js/modules/es6.typed.uint8-clamped-array.js","core-js/modules/es6.typed.int16-array":"../../node_modules/core-js/modules/es6.typed.int16-array.js","core-js/modules/es6.typed.uint16-array":"../../node_modules/core-js/modules/es6.typed.uint16-array.js","core-js/modules/es6.typed.int32-array":"../../node_modules/core-js/modules/es6.typed.int32-array.js","core-js/modules/es6.typed.uint32-array":"../../node_modules/core-js/modules/es6.typed.uint32-array.js","core-js/modules/es6.typed.float32-array":"../../node_modules/core-js/modules/es6.typed.float32-array.js","core-js/modules/es6.typed.float64-array":"../../node_modules/core-js/modules/es6.typed.float64-array.js","core-js/modules/es6.weak-map":"../../node_modules/core-js/modules/es6.weak-map.js","core-js/modules/es6.weak-set":"../../node_modules/core-js/modules/es6.weak-set.js","core-js/modules/web.timers":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable":"../../node_modules/core-js/modules/web.dom.iterable.js","regenerator-runtime/runtime":"../../node_modules/regenerator-runtime/runtime.js","validator/lib/isEmail":"../../node_modules/validator/lib/isEmail.js","validator/lib/isLength":"../../node_modules/validator/lib/isLength.js","../component/alert":"../component/alert.js","../ajax/ajax":"../ajax/ajax.js"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"core-js/modules/es6.array.copy-within":"../../node_modules/core-js/modules/es6.array.copy-within.js","core-js/modules/es6.array.fill":"../../node_modules/core-js/modules/es6.array.fill.js","core-js/modules/es6.array.find":"../../node_modules/core-js/modules/es6.array.find.js","core-js/modules/es6.array.find-index":"../../node_modules/core-js/modules/es6.array.find-index.js","core-js/modules/es7.array.flat-map":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.from":"../../node_modules/core-js/modules/es6.array.from.js","core-js/modules/es7.array.includes":"../../node_modules/core-js/modules/es7.array.includes.js","core-js/modules/es6.array.iterator":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.of":"../../node_modules/core-js/modules/es6.array.of.js","core-js/modules/es6.array.sort":"../../node_modules/core-js/modules/es6.array.sort.js","core-js/modules/es6.array.species":"../../node_modules/core-js/modules/es6.array.species.js","core-js/modules/es6.date.to-json":"../../node_modules/core-js/modules/es6.date.to-json.js","core-js/modules/es6.date.to-primitive":"../../node_modules/core-js/modules/es6.date.to-primitive.js","core-js/modules/es6.function.has-instance":"../../node_modules/core-js/modules/es6.function.has-instance.js","core-js/modules/es6.function.name":"../../node_modules/core-js/modules/es6.function.name.js","core-js/modules/es6.map":"../../node_modules/core-js/modules/es6.map.js","core-js/modules/es6.math.acosh":"../../node_modules/core-js/modules/es6.math.acosh.js","core-js/modules/es6.math.asinh":"../../node_modules/core-js/modules/es6.math.asinh.js","core-js/modules/es6.math.atanh":"../../node_modules/core-js/modules/es6.math.atanh.js","core-js/modules/es6.math.cbrt":"../../node_modules/core-js/modules/es6.math.cbrt.js","core-js/modules/es6.math.clz32":"../../node_modules/core-js/modules/es6.math.clz32.js","core-js/modules/es6.math.cosh":"../../node_modules/core-js/modules/es6.math.cosh.js","core-js/modules/es6.math.expm1":"../../node_modules/core-js/modules/es6.math.expm1.js","core-js/modules/es6.math.fround":"../../node_modules/core-js/modules/es6.math.fround.js","core-js/modules/es6.math.hypot":"../../node_modules/core-js/modules/es6.math.hypot.js","core-js/modules/es6.math.imul":"../../node_modules/core-js/modules/es6.math.imul.js","core-js/modules/es6.math.log1p":"../../node_modules/core-js/modules/es6.math.log1p.js","core-js/modules/es6.math.log10":"../../node_modules/core-js/modules/es6.math.log10.js","core-js/modules/es6.math.log2":"../../node_modules/core-js/modules/es6.math.log2.js","core-js/modules/es6.math.sign":"../../node_modules/core-js/modules/es6.math.sign.js","core-js/modules/es6.math.sinh":"../../node_modules/core-js/modules/es6.math.sinh.js","core-js/modules/es6.math.tanh":"../../node_modules/core-js/modules/es6.math.tanh.js","core-js/modules/es6.math.trunc":"../../node_modules/core-js/modules/es6.math.trunc.js","core-js/modules/es6.number.constructor":"../../node_modules/core-js/modules/es6.number.constructor.js","core-js/modules/es6.number.epsilon":"../../node_modules/core-js/modules/es6.number.epsilon.js","core-js/modules/es6.number.is-finite":"../../node_modules/core-js/modules/es6.number.is-finite.js","core-js/modules/es6.number.is-integer":"../../node_modules/core-js/modules/es6.number.is-integer.js","core-js/modules/es6.number.is-nan":"../../node_modules/core-js/modules/es6.number.is-nan.js","core-js/modules/es6.number.is-safe-integer":"../../node_modules/core-js/modules/es6.number.is-safe-integer.js","core-js/modules/es6.number.max-safe-integer":"../../node_modules/core-js/modules/es6.number.max-safe-integer.js","core-js/modules/es6.number.min-safe-integer":"../../node_modules/core-js/modules/es6.number.min-safe-integer.js","core-js/modules/es6.number.parse-float":"../../node_modules/core-js/modules/es6.number.parse-float.js","core-js/modules/es6.number.parse-int":"../../node_modules/core-js/modules/es6.number.parse-int.js","core-js/modules/es6.object.assign":"../../node_modules/core-js/modules/es6.object.assign.js","core-js/modules/es7.object.define-getter":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.entries":"../../node_modules/core-js/modules/es7.object.entries.js","core-js/modules/es6.object.freeze":"../../node_modules/core-js/modules/es6.object.freeze.js","core-js/modules/es6.object.get-own-property-descriptor":"../../node_modules/core-js/modules/es6.object.get-own-property-descriptor.js","core-js/modules/es7.object.get-own-property-descriptors":"../../node_modules/core-js/modules/es7.object.get-own-property-descriptors.js","core-js/modules/es6.object.get-own-property-names":"../../node_modules/core-js/modules/es6.object.get-own-property-names.js","core-js/modules/es6.object.get-prototype-of":"../../node_modules/core-js/modules/es6.object.get-prototype-of.js","core-js/modules/es7.object.lookup-getter":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.prevent-extensions":"../../node_modules/core-js/modules/es6.object.prevent-extensions.js","core-js/modules/es6.object.to-string":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es6.object.is":"../../node_modules/core-js/modules/es6.object.is.js","core-js/modules/es6.object.is-frozen":"../../node_modules/core-js/modules/es6.object.is-frozen.js","core-js/modules/es6.object.is-sealed":"../../node_modules/core-js/modules/es6.object.is-sealed.js","core-js/modules/es6.object.is-extensible":"../../node_modules/core-js/modules/es6.object.is-extensible.js","core-js/modules/es6.object.keys":"../../node_modules/core-js/modules/es6.object.keys.js","core-js/modules/es6.object.seal":"../../node_modules/core-js/modules/es6.object.seal.js","core-js/modules/es6.object.set-prototype-of":"../../node_modules/core-js/modules/es6.object.set-prototype-of.js","core-js/modules/es7.object.values":"../../node_modules/core-js/modules/es7.object.values.js","core-js/modules/es6.promise":"../../node_modules/core-js/modules/es6.promise.js","core-js/modules/es7.promise.finally":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.reflect.apply":"../../node_modules/core-js/modules/es6.reflect.apply.js","core-js/modules/es6.reflect.construct":"../../node_modules/core-js/modules/es6.reflect.construct.js","core-js/modules/es6.reflect.define-property":"../../node_modules/core-js/modules/es6.reflect.define-property.js","core-js/modules/es6.reflect.delete-property":"../../node_modules/core-js/modules/es6.reflect.delete-property.js","core-js/modules/es6.reflect.get":"../../node_modules/core-js/modules/es6.reflect.get.js","core-js/modules/es6.reflect.get-own-property-descriptor":"../../node_modules/core-js/modules/es6.reflect.get-own-property-descriptor.js","core-js/modules/es6.reflect.get-prototype-of":"../../node_modules/core-js/modules/es6.reflect.get-prototype-of.js","core-js/modules/es6.reflect.has":"../../node_modules/core-js/modules/es6.reflect.has.js","core-js/modules/es6.reflect.is-extensible":"../../node_modules/core-js/modules/es6.reflect.is-extensible.js","core-js/modules/es6.reflect.own-keys":"../../node_modules/core-js/modules/es6.reflect.own-keys.js","core-js/modules/es6.reflect.prevent-extensions":"../../node_modules/core-js/modules/es6.reflect.prevent-extensions.js","core-js/modules/es6.reflect.set":"../../node_modules/core-js/modules/es6.reflect.set.js","core-js/modules/es6.reflect.set-prototype-of":"../../node_modules/core-js/modules/es6.reflect.set-prototype-of.js","core-js/modules/es6.regexp.constructor":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.set":"../../node_modules/core-js/modules/es6.set.js","core-js/modules/es6.symbol":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es6.string.anchor":"../../node_modules/core-js/modules/es6.string.anchor.js","core-js/modules/es6.string.big":"../../node_modules/core-js/modules/es6.string.big.js","core-js/modules/es6.string.blink":"../../node_modules/core-js/modules/es6.string.blink.js","core-js/modules/es6.string.bold":"../../node_modules/core-js/modules/es6.string.bold.js","core-js/modules/es6.string.code-point-at":"../../node_modules/core-js/modules/es6.string.code-point-at.js","core-js/modules/es6.string.ends-with":"../../node_modules/core-js/modules/es6.string.ends-with.js","core-js/modules/es6.string.fixed":"../../node_modules/core-js/modules/es6.string.fixed.js","core-js/modules/es6.string.fontcolor":"../../node_modules/core-js/modules/es6.string.fontcolor.js","core-js/modules/es6.string.fontsize":"../../node_modules/core-js/modules/es6.string.fontsize.js","core-js/modules/es6.string.from-code-point":"../../node_modules/core-js/modules/es6.string.from-code-point.js","core-js/modules/es6.string.includes":"../../node_modules/core-js/modules/es6.string.includes.js","core-js/modules/es6.string.italics":"../../node_modules/core-js/modules/es6.string.italics.js","core-js/modules/es6.string.iterator":"../../node_modules/core-js/modules/es6.string.iterator.js","core-js/modules/es6.string.link":"../../node_modules/core-js/modules/es6.string.link.js","core-js/modules/es7.string.pad-start":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es6.string.raw":"../../node_modules/core-js/modules/es6.string.raw.js","core-js/modules/es6.string.repeat":"../../node_modules/core-js/modules/es6.string.repeat.js","core-js/modules/es6.string.small":"../../node_modules/core-js/modules/es6.string.small.js","core-js/modules/es6.string.starts-with":"../../node_modules/core-js/modules/es6.string.starts-with.js","core-js/modules/es6.string.strike":"../../node_modules/core-js/modules/es6.string.strike.js","core-js/modules/es6.string.sub":"../../node_modules/core-js/modules/es6.string.sub.js","core-js/modules/es6.string.sup":"../../node_modules/core-js/modules/es6.string.sup.js","core-js/modules/es7.string.trim-left":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/es6.typed.array-buffer":"../../node_modules/core-js/modules/es6.typed.array-buffer.js","core-js/modules/es6.typed.int8-array":"../../node_modules/core-js/modules/es6.typed.int8-array.js","core-js/modules/es6.typed.uint8-array":"../../node_modules/core-js/modules/es6.typed.uint8-array.js","core-js/modules/es6.typed.uint8-clamped-array":"../../node_modules/core-js/modules/es6.typed.uint8-clamped-array.js","core-js/modules/es6.typed.int16-array":"../../node_modules/core-js/modules/es6.typed.int16-array.js","core-js/modules/es6.typed.uint16-array":"../../node_modules/core-js/modules/es6.typed.uint16-array.js","core-js/modules/es6.typed.int32-array":"../../node_modules/core-js/modules/es6.typed.int32-array.js","core-js/modules/es6.typed.uint32-array":"../../node_modules/core-js/modules/es6.typed.uint32-array.js","core-js/modules/es6.typed.float32-array":"../../node_modules/core-js/modules/es6.typed.float32-array.js","core-js/modules/es6.typed.float64-array":"../../node_modules/core-js/modules/es6.typed.float64-array.js","core-js/modules/es6.weak-map":"../../node_modules/core-js/modules/es6.weak-map.js","core-js/modules/es6.weak-set":"../../node_modules/core-js/modules/es6.weak-set.js","core-js/modules/web.timers":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable":"../../node_modules/core-js/modules/web.dom.iterable.js","regenerator-runtime/runtime":"../../node_modules/regenerator-runtime/runtime.js","validator/lib/isLength":"../../node_modules/validator/lib/isLength.js","../component/alert":"../component/alert.js","../component/loader":"../component/loader.js","../ajax/axios":"../ajax/axios.js"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -9505,5 +9006,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","login.js"], null)
-//# sourceMappingURL=/login.js.map
+},{}]},{},["../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","resetPassword.js"], null)
+//# sourceMappingURL=/resetPassword.js.map

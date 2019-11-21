@@ -20,7 +20,7 @@ exports.getCheckoutSession = catchError(async (req, res, next) => {
         line_items: [
             {
                 name: tour.name,
-                description: tour.description,
+                description: tour.description.substring(0,120),
                 images: [`https://www.natours.dev/img/tours/${tour.imageCover}`],
                 amount: tour.price * 100, // in stripe amount count as (cent) not (doller)
                 currency: 'usd',
@@ -50,3 +50,4 @@ exports.getOneBooking = factoryHandler.getOne(Booking);
 exports.createBooking = factoryHandler.createOne(Booking);
 exports.updateBooking = factoryHandler.updateOne(Booking);
 exports.deleteBooking = factoryHandler.deleteOne(Booking);
+

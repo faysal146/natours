@@ -45,8 +45,8 @@ module.exports = class Email {
                 html,
                 text: htmlToText.fromString(html)
             };
-            const some = await this.mailTransport().sendMail(mailOptions);
-            console.log(some);
+            await this.mailTransport().sendMail(mailOptions);
+            //console.log(some);
         } catch (err) {
             console.log(err);
         }

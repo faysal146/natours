@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const chalk = require('chalk');
+//const chalk = require('chalk');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
@@ -80,7 +80,7 @@ exports.protectRoute = catchError(async (req, res, next) => {
     // put user data in request
     req.user = currentUser;
     res.locals.user = currentUser;
-    console.log(chalk.bgGreen.bold('current user  =>'), currentUser);
+    //console.log(chalk.bgGreen.bold('current user  =>'), currentUser);
     // call the next middlewere
     next();
 });
@@ -108,7 +108,7 @@ exports.singUp = catchError(async (req, res, next) => {
     const addNewUser = await User.create(newUser);
     const token = authToken(addNewUser._id);
     const url = `${req.protocol}://${req.get('host')}/account`;
-    console.log(url);
+    //console.log(url);
     await new Email(addNewUser, url).sendWelcome();
     sendResponse({ res, statusCode: 201, token, user: newUser });
 });
@@ -163,7 +163,7 @@ exports.isLoggedin = async (req, res, next) => {
             put current user in locals object to get access user in the pug template
         */
             res.locals.user = currentUser;
-            console.log(chalk.cyanBright(currentUser));
+            //console.log(chalk.cyanBright(currentUser));
             next();
         } catch (err) {
             next();
@@ -197,7 +197,7 @@ exports.forgotPassword = catchError(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     // 3) send email to the user with random token
-    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/reset-password/${resetToken}`;
+    const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
 
     try {
         await new Email(user, resetUrl).sendResetPassword();

@@ -68,8 +68,8 @@ exports.getMe = (req, res, next) => {
 };
 
 exports.updateMyAccount = catchError(async (req, res, next) => {
-    console.log('multer file ===> ', req.file);
-    console.log('multer body ===> ', req.body);
+    //console.log('multer file ===> ', req.file);
+    //console.log('multer body ===> ', req.body);
     // 1) check if password is change with this route
     if (req.body.password || req.body.confirmPassword) {
         return next(new ErrorHandler('sorry this route is not for changing the password please use /user/update-password route', 400));

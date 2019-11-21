@@ -9,7 +9,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression')
-const chalk = require('chalk');
+//const chalk = require('chalk');
 
 const tourRouter = require('./Routes/TourRoute/TourRoute');
 const userRouter = require('./Routes/UserRoute/UserRoute');
@@ -62,12 +62,12 @@ app.use(cookieParser());
 app.use(compression())
 
 // test middle were
-app.use((req, res, next) => {
-    req.requestTime = new Date().toISOString();
-    console.log(chalk.blueBright('cookies..'), req.cookies);
-    next();
-});
-console.log(chalk.rgb(255, 100, 50).bold(process.env.NODE_ENV));
+// app.use((req, res, next) => {
+//     req.requestTime = new Date().toISOString();
+//     console.log(chalk.blueBright('cookies..'), req.cookies);
+//     next();
+// });
+// console.log(chalk.rgb(255, 100, 50).bold(process.env.NODE_ENV));
 
 // Route Middle were
 app.use('/api/v1/tours', tourRouter);

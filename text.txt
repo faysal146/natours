@@ -5,5 +5,10 @@ todo
 
 
 add review slider
-hide book tour now block if user book this tour and prevent duplicate tour book
 add write review block if user is already book the tour
+cencel booking 
+show all the review
+delete review
+update review
+show billings
+

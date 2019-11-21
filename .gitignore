@@ -3,3 +3,4 @@ node_modules/
 yarn-error.log
 Client/node_modules
 Client/yarn-error.log
+Client/.cache

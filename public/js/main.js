@@ -1898,8 +1898,6 @@ if (logoutBtn) {
 
 function logoutUser() {
   _axios.default.get('users/logout').then(function (res) {
-    console.log(res);
-
     if (res.data.status === 'success') {
       (0, _alert.default)('success', 'Loggin out....');
       window.location.assign('/');
@@ -1908,7 +1906,6 @@ function logoutUser() {
       (0, _alert.default)('error', 'something went wrong');
     }
   }).catch(function (err) {
-    console.log(err.response);
     (0, _alert.default)('error', 'Error something went wrong...');
   });
 }
@@ -1940,7 +1937,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56798" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53404" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

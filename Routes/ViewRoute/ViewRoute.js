@@ -7,8 +7,21 @@ const router = express.Router();
 
 router.get('/', authController.isLoggedin, bookingsController.confirmBooking, viewController.getOverView);
 router.get('/tour/:tourSlug', authController.isLoggedin, viewController.getTour);
-router.get('/login', authController.isLoggedin, viewController.protectRouteFormAuthUser,  viewController.getLoginFrom);
-router.get('/singup', authController.isLoggedin, viewController.protectRouteFormAuthUser,  viewController.getSingupFrom);
+router.get('/login', authController.isLoggedin, viewController.protectRouteFormAuthUser, viewController.getLoginFrom);
+router.get('/singup', authController.isLoggedin, viewController.protectRouteFormAuthUser, viewController.getSingupFrom);
+router.get(
+    '/forget-password',
+    authController.isLoggedin,
+    viewController.protectRouteFormAuthUser,
+    viewController.getForgetPassword
+);
+router.get(
+    '/reset-password',
+    authController.isLoggedin,
+    viewController.protectRouteFormAuthUser,
+    viewController.validateForgetPasswordToken,
+    viewController.getResetPassword
+);
 
 router.use(authController.protectRoute);
 router.get('/account', viewController.userAccount);

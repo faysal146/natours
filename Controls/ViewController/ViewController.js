@@ -1,6 +1,7 @@
-const chalk = require('chalk');
+const crypto = require('crypto');
+//const chalk = require('chalk');
 const Tour = require('../../Models/TourModel/TourModel');
-//const User = require('../../Models/UserModel/UserModel');
+const User = require('../../Models/UserModel/UserModel');
 const Booking = require('../../Models/BookingModel/BookingModel');
 const catchError = require('../../Utils/catchError');
 const ErrorHandler = require('../../Utils/ErrorHandler');
@@ -24,6 +25,11 @@ exports.getTour = catchError(async (req, res, next) => {
     if (!tour) {
         return next(new ErrorHandler('no tour found with this name!', 404));
     }
+    if (res.locals.user) {
+        const bookedTour = await Booking.find({ tour: tour._id, user: res.locals.user._id });
+        tour.isTourBooked = bookedTour[0];
+    }
+    //console.log(tour.isTourBooked)
     // 2) build the template and render it
     res.status(200).render('Tour', {
         title: tour.name,
@@ -56,9 +62,35 @@ exports.getMyBookings = catchError(async (req, res, next) => {
         tours
     });
 });
-exports.getLoginFrom = (_, res) => sendPage('Login', 'Login' , res);
-exports.getSingupFrom = (_, res) => sendPage('Singup','Singup', res);
-exports.userAccount = (_, res) => sendPage('UserAccount','Account', res);
+exports.validateForgetPasswordToken = catchError(async (req, res, next) => {
+    // 1) get the token from params
+    const { token } = req.query;
+    // 2 ) check there is a token
+    if (!token) {
+        return next(new ErrorHandler('invalid token', 400));
+    }
+    // 3) hased the token
+    const hasedToken = crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
+    // 4 ) check token is valid or has not expried
+    const user = await User.findOne({
+        passwordResetToken: hasedToken,
+        passwordResetExpired: { $gt: Date.now() }
+    });
+    // 5) if no user find mean => token is not valid or time has expired
+    if (!user) {
+        // stop the code and send the error message
+        return next(new ErrorHandler('Token is invalid or has expired', 400));
+    }
+    next();
+});
+exports.getForgetPassword = (req, res) => sendPage('ForgetPassword', 'Forget Password', res);
+exports.getResetPassword = (req, res) => sendPage('ResetPassword', 'Reset Password', res);
+exports.getLoginFrom = (_, res) => sendPage('Login', 'Login', res);
+exports.getSingupFrom = (_, res) => sendPage('Singup', 'Singup', res);
+exports.userAccount = (_, res) => sendPage('UserAccount', 'Account', res);
 
 // ===> woring direct from submit
 
